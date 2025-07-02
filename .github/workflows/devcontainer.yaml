@@ -1,0 +1,37 @@
+# This workflow builds and runs the dev container defined in the .devcontainer directory to ensure validity.
+name: Dev Container
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .devcontainer/**
+      - .github/workflows/devcontainer.yaml
+      - docker-compose.yaml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .devcontainer/**
+      - .github/workflows/devcontainer.yaml
+      - docker-compose.yaml
+  schedule:
+    - cron: 0 0 1 * * # At midnight on the first day of every month
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  devcontainer:
+    name: Validate Dev Container
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build and run dev container
+        uses: devcontainers/ci@v0.3
+        with:
+          runCmd: echo "Dev container is running successfully."
+          push: never

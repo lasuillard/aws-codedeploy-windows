@@ -1,0 +1,30 @@
+[project]
+name = "aws-codedeploy-windows"
+version = "0.1.0"
+description = "My project starter template with Dev Container configured."
+authors = [{ name = "Yuchan Lee", email = "lasuillard@gmail.com" }]
+readme = "README.md"
+requires-python = ">=3.13, <4.0"
+dependencies = ["fastapi[standard]>=0.115.14"]
+
+[dependency-groups]
+dev = [
+    "coverage>=7.9.1",
+    "factory-boy>=3.3.3",
+    "faker>=37.4.0",
+    "pytest>=8.4.1",
+    "pytest-cov>=6.2.1",
+    "pytest-sugar>=1.0.0",
+    "ruff>=0.12.0",
+    "ty>=0.0.1a11",
+]
+
+[tool.uv]
+default-groups = ["dev"]
+
+[tool.pytest.ini_options]
+addopts = ["--cov", "--cov-report=term"]
+
+[tool.coverage.run]
+include = ["src/*"]
+omit = ["test_*.py"]

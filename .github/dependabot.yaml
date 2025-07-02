@@ -1,0 +1,26 @@
+# https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+version: 2
+updates:
+  - package-ecosystem: devcontainers
+    directory: /
+    schedule:
+      interval: monthly
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+
+  - package-ecosystem: uv
+    directory: /
+    schedule:
+      interval: monthly
+    ignore:
+      # Ignore all patch updates. Only major and minor updates will be applied.
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+    groups:
+      # Group development dependencies together to reduce PR noise
+      dev-dependencies:
+        applies-to: version-updates
+        dependency-type: development

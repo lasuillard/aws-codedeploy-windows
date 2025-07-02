@@ -1,0 +1,19 @@
+services:
+  workspace:
+    build:
+      context: .
+      dockerfile: ./.devcontainer/Dockerfile
+    volumes:
+      - .:/workspaces/aws-codedeploy-windows
+      - pulumi:/home/vscode/.pulumi
+      - aws:/home/vscode/.aws
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    environment:
+      CONTAINER: 1
+    healthcheck:
+      disable: true
+
+volumes:
+  pulumi:
+  aws:

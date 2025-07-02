@@ -1,0 +1,13 @@
+{
+    "recommendations": [
+        "EditorConfig.EditorConfig",
+        "streetsidesoftware.code-spell-checker",
+        "astral-sh.ty",
+        "charliermarsh.ruff",
+        "ms-python.debugpy",
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-toolsai.jupyter",
+        "VisualStudioExptTeam.vscodeintellicode"
+    ]
+}

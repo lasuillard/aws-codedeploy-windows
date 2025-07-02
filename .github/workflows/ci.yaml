@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  UV_FROZEN: 1
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: latest
+          enable-cache: true
+
+      - name: Install deps
+        run: uv sync
+
+      - name: Check formatting
+        run: uv run ruff format --check
+
+      - name: Lint code
+        run: uv run ruff check
+
+      - name: Type check
+        run: uv run ty check
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # Required for Codecov OIDC authentication
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: latest
+          enable-cache: true
+
+      - name: Install deps
+        run: uv sync
+
+      - name: Run tests
+        run: uv run pytest --cov-report=xml --junitxml=junit.xml
+
+      - name: Upload test results to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          use_oidc: true
+          fail_ci_if_error: false
+          report_type: test_results
+          files: junit.xml
+
+      - name: Upload code coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          use_oidc: true
+          fail_ci_if_error: false
+          files: coverage.xml

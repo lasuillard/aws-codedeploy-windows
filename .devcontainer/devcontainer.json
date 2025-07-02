@@ -1,0 +1,36 @@
+{
+    "name": "lasuillard/aws-codedeploy-windows",
+    "dockerComposeFile": [
+        "../docker-compose.yaml",
+        "./docker-compose.devcontainer.yaml"
+    ],
+    "service": "workspace",
+    "workspaceFolder": "/workspaces/aws-codedeploy-windows",
+    "shutdownAction": "stopCompose",
+    "features": {
+        "ghcr.io/devcontainers/features/aws-cli:1": {}
+    },
+    "overrideCommand": true,
+    "onCreateCommand": "./.devcontainer/onCreateCommand.sh",
+    "updateContentCommand": "./.devcontainer/updateContentCommand.sh",
+    "postCreateCommand": "./.devcontainer/postCreateCommand.sh",
+    "postStartCommand": "./.devcontainer/postStartCommand.sh",
+    "remoteEnv": {
+        "PYTHONPATH": "${containerWorkspaceFolder}"
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "EditorConfig.EditorConfig",
+                "streetsidesoftware.code-spell-checker",
+                "astral-sh.ty",
+                "charliermarsh.ruff",
+                "ms-python.debugpy",
+                "ms-python.python",
+                "ms-python.vscode-pylance",
+                "ms-toolsai.jupyter",
+                "VisualStudioExptTeam.vscodeintellicode"
+            ]
+        }
+    }
+}
