@@ -1,0 +1,30 @@
+<powershell>
+$ErrorActionPreference = 'Stop'
+
+choco install nssm --yes
+
+# Create admin user
+Add-Type -AssemblyName System.Web
+$adminUsername = 'Keeper'
+$adminPassword = [System.Web.Security.Membership]::GeneratePassword(16,4)
+New-LocalUser `
+  -Name $adminUsername `
+  -Password (ConvertTo-SecureString -AsPlainText -Force $adminPassword) `
+  -AccountNeverExpires:$true
+
+Add-LocalGroupMember -Group 'Administrators' -Member $adminUsername
+
+# Update registry to enable auto logon
+$registryPath = 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon'
+Set-ItemProperty -Path $registryPath -Name AutoAdminLogon -Value 1
+Set-ItemProperty -Path $registryPath -Name DefaultUserName -Value $adminUsername
+Set-ItemProperty -Path $registryPath -Name DefaultPassword -Value $adminPassword
+Set-ItemProperty -Path $registryPath -Name ForceAutoLogon -Value 1
+
+# Firewall rules
+New-NetFirewallRule -DisplayName 'Web Server (8000)' -Action Allow -Direction Inbound -Protocol TCP -LocalPort 8000
+
+# https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2launch-v2-settings.html
+exit 3010
+</powershell>
+<persist>false</persist>

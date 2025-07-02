@@ -1,0 +1,8 @@
+name: aws-codedeploy-windows
+runtime:
+  name: python
+  options:
+    toolchain: uv
+    virtualenv: ../.venv
+config:
+  aws:region: ap-northeast-2

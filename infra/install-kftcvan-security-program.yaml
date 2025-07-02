@@ -1,0 +1,16 @@
+name: Install KFTCVAN Security Program
+description: Install KFTCVAN security program.
+schemaVersion: 1.0
+phases:
+  - name: build
+    steps:
+      - name: DownloadAndInstall
+        action: ExecutePowerShell
+        inputs:
+          commands:
+            - |
+              $filePath = 'C:\Windows\Temp\nos_setup.exe'
+              Invoke-WebRequest `
+                -Uri 'https://www.kftcvan.or.kr/pluginfree/nos_setup.exe' `
+                -OutFile $filePath
+              & $filePath /S
