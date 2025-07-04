@@ -9,7 +9,8 @@ class _Provider(ResourceProvider):
     def create(self, props: Any) -> CreateResult:
         client_token = props["client_token"]
 
-        imagebuilder = boto3.client("imagebuilder")
+        session = boto3.Session(region_name=props.get("region", None))
+        imagebuilder = session.client("imagebuilder")
         response = imagebuilder.start_image_pipeline_execution(
             imagePipelineArn=props["image_pipeline_arn"],
             clientToken=client_token,
@@ -31,6 +32,7 @@ class TriggerImagePipeline(Resource):
         *,
         image_pipeline_arn: Input[str],
         client_token: Input[str] | None = None,
+        region: Input[str] | None = None,
     ) -> None:
         super().__init__(
             _Provider(),
@@ -38,6 +40,7 @@ class TriggerImagePipeline(Resource):
             {
                 "image_pipeline_arn": image_pipeline_arn,
                 "client_token": client_token or resource_name,
+                "region": region,
             },
             opts,
         )

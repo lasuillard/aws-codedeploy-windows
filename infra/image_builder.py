@@ -147,10 +147,12 @@ image_pipeline = aws.imagebuilder.ImagePipeline(
 dynamic.TriggerImagePipeline(
     "windows-fleet-initial-build",
     image_pipeline_arn=image_pipeline.arn,
+    region=region,
 )
 dynamic.CleanupImagePipeline(
     "windows-fleet-cleanup",
     image_pipeline_name=image_pipeline.name,
+    region=region,
 )
 
 # Output Resource Lifecycle
