@@ -72,7 +72,7 @@ class CleanupImagePipeline(Resource):
 
     def __init__(  # noqa: D107
         self,
-        name: str,
+        resource_name: str,
         opts: ResourceOptions | None = None,
         *,
         image_pipeline_name: Input[str],
@@ -80,7 +80,7 @@ class CleanupImagePipeline(Resource):
     ) -> None:
         super().__init__(
             _Provider(),
-            name,
+            resource_name,
             {
                 "image_pipeline_name": image_pipeline_name,
                 "region": region,
