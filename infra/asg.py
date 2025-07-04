@@ -36,6 +36,14 @@ security_group = aws.ec2.SecurityGroup(
             "to_port": 8000,
             "security_groups": [alb.security_group.id],
         },
+        {
+            # ! Allow RDP access from anywhere, for testing purposes only
+            # ! In production, update it to accept traffic only from trusted IPs
+            "protocol": "tcp",
+            "from_port": 3389,
+            "to_port": 3389,
+            "cidr_blocks": ["0.0.0.0/0"],
+        },
     ],
     egress=[
         # Allow all outbound traffic
