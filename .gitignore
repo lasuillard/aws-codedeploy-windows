@@ -1,5 +1,6 @@
 # Put any files or directories you want to ignore in this file.
 **/.env
+infra/Pulumi.*.yaml
 
 # Created by https://www.toptal.com/developers/gitignore/api/git,linux,macos,windows,visualstudiocode,python
 # Edit at https://www.toptal.com/developers/gitignore?templates=git,linux,macos,windows,visualstudiocode,python
