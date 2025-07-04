@@ -1,6 +1,6 @@
 from pulumi import export
 
-from . import codedeploy, codedeploy_application
+from . import alb, codedeploy, codedeploy_application
 
 export(
     "codedeploy.build-artifacts",
@@ -13,4 +13,10 @@ export(
 export(
     "codedeploy.deployment-group-name",
     codedeploy_application.deployment_group.deployment_group_name,
+)
+
+# TODO(lasuillard): Configure Route53 and ACM for HTTPS
+export(
+    "alb.dns-name",
+    alb.load_balancer.dns_name,
 )
