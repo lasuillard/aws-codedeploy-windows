@@ -24,7 +24,7 @@ security_group = aws.ec2.SecurityGroup(
 instance_role = (
     components.Role(
         "imagebuilder-instance-role",
-        name=f"{metadata.full_name}-imagebuilder",
+        name=f"{metadata.full_name}-imagebuilder-instance-role",
     )
     .assumable(services=["ec2.amazonaws.com"])
     .with_policies(
@@ -163,7 +163,7 @@ dynamic.CleanupImagePipeline(
 lifecycle_policy_role = (
     components.Role(
         "imagebuilder-lifecycle-role",
-        name=f"{metadata.full_name}-imagebuilder",
+        name=f"{metadata.full_name}-imagebuilder-lifecycle-role",
     )
     .assumable(services=["imagebuilder.amazonaws.com"])
     .with_policies(

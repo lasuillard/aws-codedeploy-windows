@@ -17,7 +17,12 @@ security_group = aws.ec2.SecurityGroup(
         {"protocol": "-1", "from_port": 0, "to_port": 0, "cidr_blocks": ["0.0.0.0/0"]},
     ],
 )
-suffix = random.RandomString("alb-suffix", length=7, special=False, upper=False)
+suffix = random.RandomString(
+    "alb-suffix",
+    length=min(max(32 - 1 - len(metadata.full_name), 4), 8),  # 4 ~ 8 characters
+    special=False,
+    upper=False,
+)
 lb_name = Output.concat(f"{metadata.full_name}-", suffix.result)
 load_balancer = aws.lb.LoadBalancer(
     "app",
