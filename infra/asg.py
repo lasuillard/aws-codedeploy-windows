@@ -111,9 +111,9 @@ asg = aws.autoscaling.Group(
     ),
     name=f"{metadata.full_name}-windows-fleet",
     vpc_zone_identifiers=vpc.vpc.private_subnet_ids,
-    desired_capacity=0,
-    min_size=0,
-    max_size=0,
+    desired_capacity=1,
+    min_size=1,
+    max_size=3,
     health_check_type="EC2",
     target_group_arns=[alb.target_group.arn],
     mixed_instances_policy={
