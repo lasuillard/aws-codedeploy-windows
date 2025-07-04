@@ -1,0 +1,20 @@
+# ! CodeDeploy `appspec.yml` file does not allow `.yaml` suffix
+version: 0.0
+os: windows
+files:
+  - source: \
+    destination: C:\app
+hooks:
+  # NOTE: See C:\ProgramData\Amazon\CodeDeploy\deployment-logs\codedeploy-agent-deployments.log file for debugging
+  ApplicationStop:
+    - location: deploy\ApplicationStop.ps1
+      timeout: 30
+  AfterInstall:
+    - location: deploy\AfterInstall.ps1
+      timeout: 300
+  ApplicationStart:
+    - location: deploy\ApplicationStart.ps1
+      timeout: 60
+  ValidateService:
+    - location: deploy\ValidateService.ps1
+      timeout: 120
