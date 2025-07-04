@@ -6,7 +6,7 @@ import pulumi_tls as tls
 from pulumi import Output, ResourceOptions
 from pulumi_extra import render_template
 
-from . import alb, components, metadata, vpc
+from . import alb, codedeploy, components, metadata, vpc
 
 # * AMI built from image builder is not available at the provisioning time
 # * so we need to trigger a new build to get the latest AMI and distribute it
@@ -42,10 +42,6 @@ security_group = aws.ec2.SecurityGroup(
         {"protocol": "-1", "from_port": 0, "to_port": 0, "cidr_blocks": ["0.0.0.0/0"]},
     ],
 )
-codedeploy_build_artifacts = aws.s3.BucketV2(
-    "codedeploy-build-artifacts",
-    force_destroy=True,
-)
 instance_role = (
     components.Role(
         "windows-fleet",
@@ -65,8 +61,8 @@ instance_role = (
                         "effect": "Allow",
                         "actions": ["s3:Get*", "s3:List*"],
                         "resources": [
-                            codedeploy_build_artifacts.arn,
-                            Output.concat(codedeploy_build_artifacts.arn, "/*"),
+                            codedeploy.build_artifacts.arn,
+                            Output.concat(codedeploy.build_artifacts.arn, "/*"),
                         ],
                     },
                 ],
