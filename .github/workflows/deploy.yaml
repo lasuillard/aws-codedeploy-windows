@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  # ? Trigger on push to main branch has been omitted, as this project is an example
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  deploy-to-codedeploy:
+    name: Deploy to CodeDeploy
+    runs-on: ubuntu-latest
+    environment: codedeploy
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+
+      - name: Build and upload artifacts
+        id: build-and-upload
+        run: |
+          current_datetime="$(date --iso-8601=seconds)"
+          bucket_key="app-${current_datetime}.zip"
+          ./scripts/build-and-upload.sh \
+            '${{ vars.S3_BUCKET }}' \
+            "$bucket_key"
+
+          echo "bucket-key=${bucket_key}" >> $GITHUB_OUTPUT
+
+      - name: Deploy to CodeDeploy
+        run: |
+          ./scripts/deploy.sh \
+            '${{ vars.CODEDEPLOY_APPLICATION_NAME }}' \
+            '${{ vars.CODEDEPLOY_DEPLOYMENT_GROUP_NAME }}' \
+            '${{ vars.S3_BUCKET }}' \
+            "${{ steps.build-and-upload.outputs.bucket-key }}"
+
+      - name: Upload build artifact for debugging
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifact
+          path: |
+            app-*.zip
+          retention-days: 7
