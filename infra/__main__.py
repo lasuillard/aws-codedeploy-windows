@@ -8,6 +8,7 @@ from infra import (  # noqa: E402, F401
     codedeploy,
     codedeploy_application,
     export,
+    github,
     image_builder,
     vpc,
 )

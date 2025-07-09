@@ -28,6 +28,7 @@ infra = [
     "pulumi-awsx>=2.21.1",
     "pulumi-command>=1.0.2",
     "boto3>=1.38.6",
+    "pulumi-github>=6.7.2",
 ]
 
 [tool.uv]
