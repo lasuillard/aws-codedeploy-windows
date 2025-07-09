@@ -12,6 +12,7 @@ jobs:
   deploy-to-codedeploy:
     name: Deploy to CodeDeploy
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     environment: codedeploy
     permissions:
       contents: read
