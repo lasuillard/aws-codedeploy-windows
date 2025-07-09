@@ -1,4 +1,4 @@
-name: CI
+name: Deploy to AWS CodeDeploy
 
 on:
   # ? Trigger on push to main branch has been omitted, as this project is an example
