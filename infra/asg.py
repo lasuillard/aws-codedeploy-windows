@@ -105,7 +105,7 @@ launch_template = aws.ec2.LaunchTemplate(
     },
     key_name=key_pair.key_name,
     iam_instance_profile={"arn": instance_profile.arn},
-    user_data=render_template(
+    user_data=render_template(  # ty: ignore[missing-argument]
         Path(__file__).parent / "Bootstrap.userdata.jinja",
         inputs={},
     ).apply(lambda text: base64.b64encode(text.encode()).decode("utf-8")),

@@ -7,7 +7,7 @@
 Example deploying a Python application to AWS Windows EC2 instances with CodeDeploy.
 
 > [!Note]
-> This repository is part of my [blog post](https://blog.lasuillard.me/blog/4). If you are interested in, please check my blog!
+> This repository is part of my [blog post](https://lasuillard.me/blog/post/5). If you are interested in, please check my blog!
 
 ## 🏗️ Provisioning Infrastructure
 
