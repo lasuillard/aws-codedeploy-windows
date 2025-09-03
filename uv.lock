@@ -1,5 +1,5 @@
 version = 1
-revision = 2
+revision = 3
 requires-python = ">=3.13, <4.0"
 
 [[package]]
@@ -523,7 +523,7 @@ wheels = [
 
 [[package]]
 name = "pulumi"
-version = "3.181.0"
+version = "3.189.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "debugpy" },
@@ -535,7 +535,7 @@ dependencies = [
     { name = "semver" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/df/61/12c5fb71e25e7ce518e4989e202ea14916e0f8e50759c19d181d0430e5d9/pulumi-3.181.0-py3-none-any.whl", hash = "sha256:923c28314850ce71cde0d4010df4e9392a51cab730cf9acfbe692679d281f93a", size = 356698, upload-time = "2025-06-27T10:44:43.387Z" },
+    { url = "https://files.pythonhosted.org/packages/f2/1b/20eb12fb7ece32c1608a2d8583e011ba90837d5425d8d59e89573591e200/pulumi-3.189.0-py3-none-any.whl", hash = "sha256:a9745a7e36a6ad736d59cff341bc9ab1c7ea1676b2dcdbf3bca5a180ac057dee", size = 364369, upload-time = "2025-08-13T15:33:07.396Z" },
 ]
 
 [[package]]
