@@ -96,7 +96,7 @@ infra = [
     { name = "pulumi-command", specifier = ">=1.0.2" },
     { name = "pulumi-extra", specifier = "~=0.1.0" },
     { name = "pulumi-github", specifier = ">=6.7.2" },
-    { name = "pulumi-policy", specifier = "~=1.17.0" },
+    { name = "pulumi-policy", specifier = "~=1.18.1" },
     { name = "pulumi-random", specifier = "~=4.18.0" },
     { name = "pulumi-tls", specifier = ">=5.1.1" },
 ]
@@ -685,7 +685,7 @@ wheels = [
 
 [[package]]
 name = "pulumi-policy"
-version = "1.17.0"
+version = "1.18.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "grpcio" },
@@ -694,7 +694,7 @@ dependencies = [
     { name = "setuptools" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/5c/a6/5eb154dfa02c5c180cecd64d338ff614aa95e3ebfdd08fc801b50c8637dc/pulumi_policy-1.17.0-py2.py3-none-any.whl", hash = "sha256:84cee216d6191736e94b66eee778cbd89dd802c38d60031442b8af51c44340fe", size = 18907, upload-time = "2025-07-29T15:35:36.951Z" },
+    { url = "https://files.pythonhosted.org/packages/65/88/e9226de590e0b6e0e17356c6c856d6a405e6af89812003fd1d5d27148f79/pulumi_policy-1.18.1-py2.py3-none-any.whl", hash = "sha256:dc5ee4ab1cef3bedb7f0105d806dce37bc43f4b5c2b211c6347a31c3d72f057f", size = 20630, upload-time = "2025-09-22T16:48:42.415Z" },
 ]
 
 [[package]]
