@@ -34,7 +34,7 @@ update:  ## Update deps and tools
 .PHONY: update
 
 run:  ## Run application
-	dotenvx run uv run \
+	uv run \
 		uvicorn \
 		main:app \
 		--host "$$([ -z "$$CONTAINER" ] && echo '0.0.0.0' || echo '127.0.0.1'])"
