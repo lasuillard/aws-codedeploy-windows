@@ -19,10 +19,10 @@ dev = [
     "ty>=0.0.1a11",
 ]
 infra = [
-    "pulumi-aws~=7.6.0",
+    "pulumi-aws~=7.16.0",
     "pulumi-extra~=0.1.0",
-    "pulumi-policy~=1.18.1",
-    "pulumi-random~=4.18.0",
+    "pulumi-policy~=1.20.0",
+    "pulumi-random~=4.19.1",
     "pulumi>=3.0.0,<4.0.0",
     "pulumi-tls>=5.1.1",
     "pulumi-awsx>=2.21.1",
