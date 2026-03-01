@@ -40,7 +40,7 @@ jobs:
       - name: Upload build artifact for debugging
         if: always()
         continue-on-error: true
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: build-artifact
           path: |
