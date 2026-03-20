@@ -19,8 +19,6 @@ help: Makefile  ## Show this help message
 # =============================================================================
 init:  ## Initialize the project workspace
 	pre-commit install --install-hooks
-	cp --no-clobber .env.example .env
-	cp --no-clobber .devcontainer/.env.example .devcontainer/.env
 .PHONY: init
 
 install:  ## Install deps
