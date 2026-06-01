@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/devcontainers/python:3.0.8-3.13-bookworm
+FROM mcr.microsoft.com/devcontainers/python:3.0.8-3.13-trixie
 
 # Install Pulumi CLI
 RUN curl --location --silent --show-error --fail https://get.pulumi.com | sudo sh -s -- --install-root /usr/local
