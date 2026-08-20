@@ -290,4 +290,6 @@ $RECYCLE.BIN/
 # End of https://www.toptal.com/developers/gitignore/api/git,linux,macos,windows,visualstudiocode,python
 
 # Put any files or directories you want to un-ignore in this file.
+
 !.vscode/*.example
+!src/lib
