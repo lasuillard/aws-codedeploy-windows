@@ -15,7 +15,7 @@ class Component(ComponentResource, ABC):
     def type_(self) -> str:
         """Component resource type."""
 
-    def __init__(  # noqa: D107
+    def __init__(
         self,
         resource_name: str,
         *,
@@ -34,7 +34,7 @@ class Role(Component):
 
     type_ = "custom:aws/iam:Role"
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:  # noqa: D107
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
 
         # AWS context

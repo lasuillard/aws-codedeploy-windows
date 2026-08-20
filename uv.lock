@@ -46,17 +46,10 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "boto3" },
     { name = "coverage" },
     { name = "factory-boy" },
     { name = "faker" },
-    { name = "pytest" },
-    { name = "pytest-cov" },
-    { name = "pytest-sugar" },
-    { name = "ruff" },
-    { name = "ty" },
-]
-infra = [
-    { name = "boto3" },
     { name = "pulumi" },
     { name = "pulumi-aws" },
     { name = "pulumi-awsx" },
@@ -66,6 +59,11 @@ infra = [
     { name = "pulumi-policy" },
     { name = "pulumi-random" },
     { name = "pulumi-tls" },
+    { name = "pytest" },
+    { name = "pytest-cov" },
+    { name = "pytest-sugar" },
+    { name = "ruff" },
+    { name = "ty" },
 ]
 
 [package.metadata]
@@ -73,17 +71,10 @@ requires-dist = [{ name = "fastapi", extras = ["standard"], specifier = ">=0.115
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "boto3", specifier = ">=1.38.6" },
     { name = "coverage", specifier = ">=7.9.1" },
     { name = "factory-boy", specifier = ">=3.3.3" },
     { name = "faker", specifier = ">=37.4.0" },
-    { name = "pytest", specifier = ">=8.4.1" },
-    { name = "pytest-cov", specifier = ">=6.2.1" },
-    { name = "pytest-sugar", specifier = ">=1.0.0" },
-    { name = "ruff", specifier = ">=0.12.0" },
-    { name = "ty", specifier = ">=0.0.1a11" },
-]
-infra = [
-    { name = "boto3", specifier = ">=1.38.6" },
     { name = "pulumi", specifier = ">=3.0.0,<4.0.0" },
     { name = "pulumi-aws", specifier = "~=7.16.0" },
     { name = "pulumi-awsx", specifier = ">=2.21.1" },
@@ -93,6 +84,11 @@ infra = [
     { name = "pulumi-policy", specifier = "~=1.20.0" },
     { name = "pulumi-random", specifier = "~=4.19.1" },
     { name = "pulumi-tls", specifier = ">=5.1.1" },
+    { name = "pytest", specifier = ">=8.4.1" },
+    { name = "pytest-cov", specifier = ">=6.2.1" },
+    { name = "pytest-sugar", specifier = ">=1.0.0" },
+    { name = "ruff", specifier = ">=0.12.0" },
+    { name = "ty", specifier = ">=0.0.1a11" },
 ]
 
 [[package]]

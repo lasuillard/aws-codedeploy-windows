@@ -70,7 +70,7 @@ class _Provider(ResourceProvider):
 class CleanupImagePipeline(Resource):
     """Cleanup outputs of an AWS Image Builder pipeline on resource destruction."""
 
-    def __init__(  # noqa: D107
+    def __init__(
         self,
         resource_name: str,
         opts: ResourceOptions | None = None,
