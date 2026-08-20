@@ -1,6 +1,6 @@
 import pytest
 
-from .nothing import add_numbers
+from src.nothing import add_numbers
 
 
 @pytest.mark.unit

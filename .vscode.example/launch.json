@@ -2,15 +2,17 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python Debugger: FastAPI",
+            "name": "Python: FastAPI CLI",
             "type": "debugpy",
             "request": "launch",
-            "module": "uvicorn",
+            "module": "fastapi",
             "args": [
-                "main:app",
-                "--reload"
+                "run",
+                "--port",
+                "8000"
             ],
-            "jinja": true
+            "jinja": true,
+            "justMyCode": true
         }
     ]
 }

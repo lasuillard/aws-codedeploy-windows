@@ -2,11 +2,9 @@ name: CI
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
-    branches:
-      - main
+    branches: [main]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -20,6 +18,8 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v6
 
@@ -46,7 +46,6 @@ jobs:
     timeout-minutes: 10
     permissions:
       contents: read
-      id-token: write # Required for Codecov OIDC authentication
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -61,18 +60,3 @@ jobs:
 
       - name: Run tests
         run: uv run pytest --cov-report=xml --junitxml=junit.xml
-
-      - name: Upload test results to Codecov
-        uses: codecov/codecov-action@v5
-        with:
-          use_oidc: true
-          fail_ci_if_error: false
-          report_type: test_results
-          files: junit.xml
-
-      - name: Upload code coverage to Codecov
-        uses: codecov/codecov-action@v5
-        with:
-          use_oidc: true
-          fail_ci_if_error: false
-          files: coverage.xml

@@ -1,7 +1,5 @@
 # aws-codedeploy-windows
 
-[![codecov](https://codecov.io/gh/lasuillard/aws-codedeploy-windows/graph/badge.svg?token=iKNLWbgUtD)](https://codecov.io/gh/lasuillard/aws-codedeploy-windows)
-
 Example deploying a Python application to AWS Windows EC2 instances with CodeDeploy.
 
 ## 🏗️ Provisioning Infrastructure
