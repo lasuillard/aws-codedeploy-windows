@@ -25,7 +25,7 @@ class _Provider(ResourceProvider):
 class TriggerImagePipeline(Resource):
     """Trigger an AWS Image Builder pipeline to build an image."""
 
-    def __init__(  # noqa: D107
+    def __init__(
         self,
         resource_name: str,
         opts: ResourceOptions | None = None,

@@ -1,7 +1,6 @@
 {
     "recommendations": [
         "EditorConfig.EditorConfig",
-        "streetsidesoftware.code-spell-checker",
         "astral-sh.ty",
         "charliermarsh.ruff",
         "ms-python.debugpy",
