@@ -7,14 +7,14 @@ files:
 hooks:
   # NOTE: See C:\ProgramData\Amazon\CodeDeploy\deployment-logs\codedeploy-agent-deployments.log file for debugging
   ApplicationStop:
-    - location: deploy\ApplicationStop.ps1
+    - location: deploy\aws-codedeploy\ApplicationStop.ps1
       timeout: 30
   AfterInstall:
-    - location: deploy\AfterInstall.ps1
+    - location: deploy\aws-codedeploy\AfterInstall.ps1
       timeout: 300
   ApplicationStart:
-    - location: deploy\ApplicationStart.ps1
+    - location: deploy\aws-codedeploy\ApplicationStart.ps1
       timeout: 60
   ValidateService:
-    - location: deploy\ValidateService.ps1
+    - location: deploy\aws-codedeploy\ValidateService.ps1
       timeout: 120
