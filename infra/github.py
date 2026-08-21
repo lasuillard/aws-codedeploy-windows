@@ -1,9 +1,8 @@
-from __future__ import annotations
-
 import pulumi_aws as aws
 import pulumi_github as github
 import pulumi_tls as tls
 from pulumi import Config, Output, log
+from pulumi_github.get_repository import AwaitableGetRepositoryResult
 
 from . import codedeploy, codedeploy_application, components, metadata
 
@@ -13,7 +12,9 @@ repository_fullname = config.get("github-repository-fullname")
 
 
 def main() -> None:
-    repository = github.get_repository(full_name=repository_fullname)
+    repository: AwaitableGetRepositoryResult = github.get_repository(
+        full_name=repository_fullname
+    )
     certificate = tls.get_certificate(
         url=f"https://{metadata.gha_oidc_provider_domain}/.well-known/openid-configuration",
     )
