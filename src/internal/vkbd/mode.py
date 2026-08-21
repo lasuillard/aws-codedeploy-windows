@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 logger: BoundLogger = get_logger(__name__)
 
 
-class BaseKeyboardMode[VKBD: BaseVirtualKeyboard](StateMachine):
+class BaseKeyboardMode(StateMachine):
     """
     Base abstraction for virtual keyboard mode to manage available keymap.
 
@@ -19,7 +19,12 @@ class BaseKeyboardMode[VKBD: BaseVirtualKeyboard](StateMachine):
     which most virtual keyboards do use them for password input.
     """
 
-    def __init__(self, *args: Any, vkbd: VKBD, **kwargs: Any) -> None:
+    def __init__(
+        self,
+        *args: Any,
+        vkbd: "BaseVirtualKeyboard[Any, Any]",
+        **kwargs: Any,
+    ) -> None:
         """
         Initialize state machine with webdriver instance to delegate control.
 

@@ -34,7 +34,7 @@ class Keymap(BaseKeymap):
     }
 
 
-class KeyboardMode(BaseKeyboardMode["VirtualKeyboard"]):
+class KeyboardMode(BaseKeyboardMode):
     """Keyboard state for KFTCVAN."""
 
     number_lower = State(initial=True)
