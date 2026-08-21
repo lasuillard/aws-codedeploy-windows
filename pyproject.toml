@@ -6,12 +6,13 @@ authors = [{ name = "Yuchan Lee", email = "lasuillard@gmail.com" }]
 readme = "README.md"
 requires-python = ">=3.14, <4.0"
 dependencies = [
-    "fastapi-structlog==0.7.1",
     "fastapi[standard]==0.115.14",
     "numpy==2.5.2",
     "opencv-python==5.0.0.93",
-    "python-statemachine==3.2.1",
+    "pydantic-settings==2.15.0",
+    "python-statemachine[diagrams]==3.2.1",
     "selenium==4.47.0",
+    "structlog==26.1.0",
 ]
 
 [dependency-groups]

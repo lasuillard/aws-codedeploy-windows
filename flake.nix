@@ -21,6 +21,7 @@
             pre-commit
             just
             uv
+            graphviz
             pulumi-bin
             awscli2
             ;
