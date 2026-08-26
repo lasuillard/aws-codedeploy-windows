@@ -53,7 +53,6 @@ def main() -> None:
         )
         .with_policies(
             arns=[
-                # TODO(lasuillard): Limit the permissions to mandatory permissions
                 aws.iam.ManagedPolicy.ADMINISTRATOR_ACCESS
             ],
         )

@@ -1,11 +1,8 @@
-# TODO(lasuillard): Some commands are not running; need logs
 $ErrorActionPreference = 'Stop'
 
 Set-Location C:\app
 
 # Install pipx
-# TODO(lasuillard): Command pipx is not recognized in the current session
-#                   Chocolatey Update-SessionEnvironment (refreshenv) also can't help
 python -m pip install pipx
 python -m pipx ensurepath --force
 
