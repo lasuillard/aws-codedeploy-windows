@@ -52,9 +52,7 @@ def main() -> None:
             ],
         )
         .with_policies(
-            arns=[
-                aws.iam.ManagedPolicy.ADMINISTRATOR_ACCESS
-            ],
+            arns=[aws.iam.ManagedPolicy.ADMINISTRATOR_ACCESS],
         )
         .build()
     )
