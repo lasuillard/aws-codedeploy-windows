@@ -20,7 +20,6 @@ export(
 )
 
 # ALB domain name to access the application
-# TODO(lasuillard): Configure Route53 and ACM for HTTPS
 export(
     "alb.dns-name",
     alb.load_balancer.dns_name,

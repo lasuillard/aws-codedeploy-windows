@@ -17,21 +17,22 @@
       in
       {
         packages = {
+          # Tools used in CI/CD pipelines
           inherit (pkgs)
+            ;
+        };
+
+        devShells.default = pkgs.mkShell {
+          packages = with pkgs; [
             pre-commit
             just
             uv
             graphviz
             pulumi-bin
             awscli2
-            ;
-          inherit (pkgs.pulumiPackages)
-            pulumi-python
-            ;
-        };
+            pulumiPackages.pulumi-python
+          ];
 
-        devShells.default = pkgs.mkShell {
-          packages = builtins.attrValues self.packages.${system};
           shellHook = ''
             export LD_LIBRARY_PATH="${
               pkgs.lib.makeLibraryPath [
