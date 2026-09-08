@@ -1,1 +1,43 @@
-services: {}
+services:
+  selenium-hub:
+    image: selenium/hub:4.44.0@sha256:cfd3310c2f6d2509399f216ebe9a21caf7e340460d529ccfe2e39553abc2002c
+    profiles:
+      - selenium-hub
+    ports:
+      - ${SELENIUM_HUB_HOST:-127.0.0.1}:${SELENIUM_HUB_PORT_PUBLISH:-4442}:4442
+      - ${SELENIUM_HUB_HOST:-127.0.0.1}:${SELENIUM_HUB_PORT_SUBSCRIBE:-4443}:4443
+      - ${SELENIUM_HUB_HOST:-127.0.0.1}:${SELENIUM_HUB_PORT:-4444}:4444
+    environment:
+      SE_SESSION_REQUEST_TIMEOUT: 15
+    ulimits:
+      nofile:
+        soft: 32768
+        hard: 32768
+    restart: unless-stopped
+
+  chromium:
+    image: selenium/node-chromium:4.44.0@sha256:f6769402be476cfb28e368e5bf4e8154c8b274e361dce24188d264f76e589af4
+    profiles:
+      - selenium-hub
+    depends_on:
+      - selenium-hub
+    environment:
+      SE_EVENT_BUS_HOST: selenium-hub
+      SE_EVENT_BUS_PUBLISH_PORT: 4442
+      SE_EVENT_BUS_SUBSCRIBE_PORT: 4443
+      SE_VNC_NO_PASSWORD: 1
+    shm_size: 2gb
+    restart: unless-stopped
+
+  chromium-video:
+    image: selenium/video:ffmpeg-8.1-20260505@sha256:23761152d7b97dcd65332436c5e91a594747027e430aba4e27c95ec37f2ad911
+    profiles:
+      - selenium-hub
+    depends_on:
+      - chromium
+    environment:
+      DISPLAY_CONTAINER_NAME: chromium
+      SE_NODE_GRID_URL: http://selenium-hub:4444
+      SE_VIDEO_FILE_NAME: auto
+      SE_VIDEO_UPLOAD_ENABLED: false
+    restart: unless-stopped
