@@ -1,0 +1,128 @@
+vm_ip = ENV['VM_IP'] || ''
+
+selenium_version = ENV['SELENIUM_VERSION'] || '4.44.0'
+selenium_hub_url = ENV['SELENIUM_HUB_URL'] || 'http://<your-ip>:4444'
+
+openjdk_version = "22.0.1"
+nssm_version = "2.24.101.20180116"
+
+Vagrant.configure("2") do |config|
+  config.vm.define "windows" do |windows|
+    windows.vm.box = "jborean93/WindowsServer2022"
+    windows.vm.box_version = "1.2.0"
+
+    windows.vm.provider "libvirt" do |lv|
+      lv.cpus = 2
+      lv.memory = 4096
+      # NOTE: Default disk size is 40GB set in base box
+    end
+
+    # NOTE: 3389 is the forwarded by default
+
+    # Selenium Node
+    windows.vm.network "forwarded_port", guest: 5555, host: 5555
+
+    # Install requirements
+    windows.vm.provision "shell",
+      powershell_args: "-ExecutionPolicy Bypass -NoProfile",
+      inline: <<~SCRIPT
+        choco install openjdk --yes --version #{openjdk_version}
+        choco install nssm --yes --version #{nssm_version}
+
+        # Update the PATH environment variable to include the installed tools
+        $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
+
+        # Set working directory
+        New-Item -ItemType Directory -Path "C:\\tmp" -Force | Out-Null
+        Set-Location "C:\\tmp"
+
+        # KFTCVAN requirements
+        if (!(Test-Path -Path '.\\nos_setup.exe')) {
+          Invoke-WebRequest `
+            -Uri 'https://www.kftcvan.or.kr/pluginfree/nos_setup.exe' `
+            -OutFile '.\\nos_setup.exe'
+        }
+
+        # NOTE: Installation being skipped when working in default location (C:\\Windows\\System32)
+        .\\nos_setup.exe /S
+      SCRIPT
+
+    # Install Selenium Node as a Windows service using NSSM
+    windows.vm.provision "shell",
+      powershell_args: "-ExecutionPolicy Bypass -NoProfile",
+      inline: <<~SCRIPT
+        # Set working directory
+        $workdir = Join-Path -Path $Home -ChildPath "Selenium"
+        New-Item -Path $workdir -ItemType Directory -ErrorAction Ignore
+        Set-Location $workdir
+
+        # Logging
+        $logDir = Join-Path -Path $workdir -ChildPath "logs"
+        New-Item -Path $logDir -ItemType Directory -ErrorAction Ignore
+        $stdoutLog = Join-Path -Path $logDir -ChildPath "selenium-node.stdout.log"
+        $stderrLog = Join-Path -Path $logDir -ChildPath "selenium-node.stderr.log"
+
+        # Selenium Node
+        $jarPath = Join-Path -Path $workdir -ChildPath "selenium-server-#{selenium_version}.jar"
+        if (!(Test-Path -Path $jarPath)) {
+          Invoke-WebRequest `
+            -Uri "https://github.com/SeleniumHQ/selenium/releases/download/selenium-#{selenium_version}/selenium-server-#{selenium_version}.jar" `
+            -OutFile $jarPath
+        }
+
+        # Get Java path
+        $javaPath = (Get-Command java -ErrorAction SilentlyContinue).Source
+        if (!$javaPath) {
+            $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
+            $javaPath = (Get-Command java).Source
+        }
+
+        # Get the IP address of the VM's network interface
+        $vmIp = "#{vm_ip}"
+        if (-not $vmIp) {
+          $vmIp = (Get-NetIPAddress -AddressFamily IPv4 |
+            Where-Object { $_.InterfaceAlias -like '*Ethernet*' -or $_.InterfaceAlias -like '*vEthernet*' }).IPAddress |
+            Select-Object -First 1
+        }
+
+        # Stop and remove existing Selenium Node service if it exists
+        $serviceName = 'Selenium Node'
+        $service = Get-Service -Name $serviceName -ErrorAction SilentlyContinue
+        if ($service) {
+          nssm stop $serviceName
+          nssm remove $serviceName confirm
+        }
+
+        # Register the Selenium Node service with NSSM
+        $quotedJarPath = "`"$jarPath`""
+        $seleniumArgs = @(
+          "-jar",
+          $quotedJarPath,
+          "node",
+          "--hub", "#{selenium_hub_url}",
+          "--host", $vmIp,
+          "--port", "5555",
+          "--log-level", "FINE"
+        )
+        nssm install $serviceName "$javaPath" ($seleniumArgs -join ' ')
+
+        # Configure the service to log output to files
+        nssm set $serviceName AppStdout "$stdoutLog"
+        nssm set $serviceName AppStderr "$stderrLog"
+        nssm set $serviceName AppRotateFiles 1
+        nssm set $serviceName AppRotateOnline 1
+        nssm set $serviceName AppRotateSeconds 86400 # 1 day
+
+        Set-Service -Name $serviceName -StartupType Automatic
+        nssm start $serviceName
+
+        # Allow incoming traffic from hub
+        New-NetFirewallRule `
+          -DisplayName 'Selenium Node' `
+          -LocalPort 5555 `
+          -Action Allow `
+          -Protocol TCP `
+          -Direction Inbound
+      SCRIPT
+  end
+end

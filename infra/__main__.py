@@ -2,7 +2,7 @@ from pulumi_extra.contrib.aws import register_auto_tagging
 
 register_auto_tagging()
 
-from infra import (  # noqa: F401
+from infra import (  # noqa: F401, E402
     alb,
     asg,
     codedeploy,
