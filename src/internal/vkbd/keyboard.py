@@ -1,10 +1,9 @@
 """
 Browser virtual keyboard controller.
 
-References
-----------
-- https://gist.github.com/datakurre/65ccd79b78268d4592f5530f014b61e2
-- https://github.com/soulee-dev/fuckvkeypad
+References:
+    - https://gist.github.com/datakurre/65ccd79b78268d4592f5530f014b61e2
+    - https://github.com/soulee-dev/fuckvkeypad
 
 """
 
@@ -21,7 +20,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.remote.webelement import WebElement
 from structlog import get_logger
 
-from .errors import MatchNotFoundError, StateDidNotChangedError
+from .errors import ElementNotFoundError, MatchNotFoundError, StateDidNotChangedError
 from .keymap import BaseKeymap
 from .mode import BaseKeyboardMode
 
@@ -85,9 +84,14 @@ class BaseVirtualKeyboard[KM: BaseKeymap, KS: BaseKeyboardMode](ABC):
 
         """
         for key in keys:
-            current_state = state_fn(self._wd)
+            current_state = state_fn(self._wd) or ""
+            current_state_len = (
+                len(current_state) if hasattr(current_state, "__len__") else 0
+            )
 
-            logger.debug("Sending key %r, current state is %r", key, current_state)
+            logger.debug(
+                "Sending key %r, current state length is %d", key, current_state_len
+            )
             self.ensure_mode(key)
             self.send_key(key)
 
@@ -95,12 +99,15 @@ class BaseVirtualKeyboard[KM: BaseKeymap, KS: BaseKeyboardMode](ABC):
                 logger.debug("Waiting for state change: %d-th try", i)
                 time.sleep(watch_interval)
 
-                new_state = state_fn(self._wd)
+                new_state = state_fn(self._wd) or ""
                 if current_state != new_state:
+                    new_state_len = (
+                        len(new_state) if hasattr(new_state, "__len__") else 0
+                    )
                     logger.debug(
-                        "State changed from %r to %r; escaping loop",
-                        current_state,
-                        new_state,
+                        "State length changed from %d to %d; escaping loop",
+                        current_state_len,
+                        new_state_len,
                     )
                     break
 
@@ -159,12 +166,12 @@ class BaseVirtualKeyboard[KM: BaseKeymap, KS: BaseKeyboardMode](ABC):
             threshold: Match threshold to raise error. If `None`, do not raise.
             draw_area: Draw matching area to given image. Defaults to `False`.
 
+        Returns:
+            Center position of match area.
+
         Raises:
             MatchNotFoundError: Matching image not found for given `threshold`.
                 If `threshold` is not set, it will not raised.
-
-        Returns:
-            Center position of match area.
 
         """
         key_img = self._keymap.get(key)
@@ -180,8 +187,8 @@ class BaseVirtualKeyboard[KM: BaseKeymap, KS: BaseKeyboardMode](ABC):
             cv2.rectangle(img, max_loc, (x + w, y + h), (255, 0, 0), thickness=3)
 
         # Assert threshold
-        if threshold and max_val >= threshold:
-            msg = f"Failed to find a match; max: {max_val}"
+        if threshold is not None and max_val < threshold:
+            msg = f"Failed to find a match; max: {max_val} < threshold: {threshold}"
             raise MatchNotFoundError(msg)
 
         return (int(x + w / 2), int(y + h / 2))
@@ -200,16 +207,17 @@ class BaseVirtualKeyboard[KM: BaseKeymap, KS: BaseKeyboardMode](ABC):
         Args:
             x: Point x.
             y: Point y.
-            draw_point: _description_. Defaults to `False`.
+            draw_point: Whether to draw click point on the image. Defaults to `False`.
             img: Image to draw point. Required if `draw_point` is `True`.
                 Image is not used for clicking; it's just for drawing point.
 
         """
-        elem = self._wd.execute_script(f"return document.elementFromPoint({x}, {y});")
+        elem = self._wd.execute_script(
+            "return document.elementFromPoint(arguments[0], arguments[1]);", x, y
+        )
         if not isinstance(elem, WebElement):
-            logger.warning(
-                "Element at point is not `WebElement` instance, actual: %s", type(elem)
-            )
+            msg = f"Element at point ({x}, {y}) is not a WebElement instance: {elem!r}"
+            raise ElementNotFoundError(msg)
 
         # Leave a dot (filled red circle) at click position
         if draw_point:

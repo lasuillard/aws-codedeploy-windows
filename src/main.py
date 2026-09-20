@@ -1,8 +1,8 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, status
 
 from src.scrapers.errors import AuthenticationError
 from src.scrapers.kftc import KftcScraper
-from src.scrapers.kftc.scraper import KftcLoginCredential
+from src.scrapers.kftc.datamodels import KftcLoginCredential
 
 app = FastAPI()
 
@@ -19,6 +19,9 @@ def kftc_login(login_credential: KftcLoginCredential):
         with scraper:
             scraper.login(login_credential)
     except AuthenticationError as err:
-        return {"error": f"Login failed: {err!s}"}
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Login failed: {err!s}",
+        ) from err
 
     return {"message": "Login completed."}

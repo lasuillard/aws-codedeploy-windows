@@ -1,20 +1,25 @@
 let [method, url, headers, body, data, json, encoding, callback] = arguments;
 
+let requestBody = body;
 if (data) {
   const formData = new FormData();
   for (const key in data) {
     formData.append(key, data[key]);
   }
-  body = formData;
+  requestBody = formData;
 } else if (json) {
-  body = JSON.stringify(json);
+  requestBody = JSON.stringify(json);
 }
 
-const response = await fetch(url, { method, headers, body });
-response.arrayBuffer()
-  .then(buffer => {
-    const decoder = new TextDecoder(encoding);
-    return [response.headers, decoder.decode(buffer)];
+fetch(url, { method, headers, body: requestBody })
+  .then(response => {
+    const headerEntries = Object.fromEntries(response.headers.entries());
+    return response.arrayBuffer().then(buffer => {
+      const decoder = new TextDecoder(encoding);
+      return { headers: headerEntries, text: decoder.decode(buffer) };
+    });
   })
-  .then(([headers, text]) => callback({ headers, text }))
-  ;
+  .then(result => callback(result))
+  .catch(err => {
+    callback({ error: err.toString(), headers: {}, text: "" });
+  });

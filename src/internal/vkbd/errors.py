@@ -16,3 +16,7 @@ class KeyImageLoadError(VirtualKeyboardError):
 
 class StateDidNotChangedError(VirtualKeyboardError):
     """Exceeded retry limit watching state change."""
+
+
+class ElementNotFoundError(VirtualKeyboardError):
+    """Failed to find element at coordinates."""

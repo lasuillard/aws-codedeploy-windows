@@ -66,17 +66,22 @@ def fetch(
         query = urlencode(params)
         url = f"{url}?{query}"
 
-    if headers and json:
-        headers.setdefault("Content-Type", "application/json")
+    req_headers = dict(headers) if headers is not None else {}
+    if json is not None:
+        req_headers.setdefault("Content-Type", "application/json")
 
     raw_response: dict[str, Any] = webdriver.execute_async_script(
         _FETCH_JS,
         method,
         url,
-        headers or {},
+        req_headers,
         body,
         data,
         json,
         encoding,
     )
+    if "error" in raw_response:
+        msg = f"Fetch failed: {raw_response['error']}"
+        raise RuntimeError(msg)
+
     return FetchResponse(headers=raw_response["headers"], text=raw_response["text"])

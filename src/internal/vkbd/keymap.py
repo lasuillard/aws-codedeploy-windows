@@ -86,9 +86,17 @@ class BaseKeymap(ABC):
     _map_img: dict[str, MatLike]
     """Map of key to loaded image."""
 
-    def __init__(self) -> None:
+    def __init__(self, img_dir: Path | None = None) -> None:
         """Initialize keymap, loading images to memory."""
-        key_to_filename = {}
+        if img_dir is not None:
+            self.img_dir = img_dir
+
+        key_to_filename = self._resolve_key_mapping()
+        self._map_img = self._load_images(key_to_filename)  # ty: ignore[invalid-assignment]
+
+    def _resolve_key_mapping(self) -> dict[str, str]:
+        """Resolve mapping from key characters to asset filenames."""
+        key_to_filename: dict[str, str] = {}
 
         # Dynamic mapping
         for key in string.digits:
@@ -122,16 +130,20 @@ class BaseKeymap(ABC):
         for key, filename in self.mapping.items():
             key_to_filename[key] = filename
 
-        # Load images
+        return key_to_filename
+
+    def _load_images(self, key_to_filename: dict[str, str]) -> dict[str, MatLike]:
+        """Load key images from asset directory."""
         map_img = {
             k: cv2.imread(str(self.img_dir / v)) for k, v in key_to_filename.items()
         }
-        load_failed = ", ".join(k for k, kf in map_img.items() if kf is None)
-        if load_failed:
-            msg = f"{len(load_failed)} key images failed to load: {load_failed}"
+        failed_keys = [k for k, img in map_img.items() if img is None]
+        if failed_keys:
+            load_failed = ", ".join(failed_keys)
+            msg = f"{len(failed_keys)} key images failed to load: {load_failed}"
             raise KeyImageLoadError(msg)
 
-        self._map_img = map_img  # ty: ignore[invalid-assignment]
+        return map_img
 
     def get(self, key: str) -> MatLike:
         """Return matching image for key."""

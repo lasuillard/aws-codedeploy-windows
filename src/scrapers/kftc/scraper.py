@@ -15,6 +15,7 @@ from structlog import get_logger
 from src.config import settings
 from src.internal.scraping import fetch
 from src.scrapers.errors import (
+    AuthenticationError,
     ContextNotInitializedError,
     InvalidCredentialsError,
     UnfulfilledRequirementError,
@@ -97,12 +98,12 @@ class KftcScraper:
         """Login to KFTCVAN with provided user credential."""
         try:
             self._login(login_credential)
-            self._validate_login(login_credential.username)
+            if not self._validate_login(login_credential.username):
+                msg = f"Failed to validate login for user: {login_credential.username}"
+                raise AuthenticationError(msg)
         except:
             logger.exception("Login failed")
             raise
-        finally:
-            self.webdriver.quit()
 
     def _login(self, login_credential: KftcLoginCredential) -> None:
         self.webdriver.maximize_window()
@@ -141,7 +142,7 @@ class KftcScraper:
 
         # Enter password
         def state_fn(webdriver: Remote) -> str:
-            return pw_input.get_attribute("value")  # ty: ignore[invalid-return-type]
+            return pw_input.get_attribute("value") or ""
 
         vkbd.send_keys(login_credential.password.get_secret_value(), state_fn=state_fn)
 
@@ -219,5 +220,5 @@ class KftcScraper:
             alert.dismiss()
             self.webdriver.refresh()
         else:
-            msg = "Security program may not running."
+            msg = "Security program may not be running."
             raise UnfulfilledRequirementError(msg)
