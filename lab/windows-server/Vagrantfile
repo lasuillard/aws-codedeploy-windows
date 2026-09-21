@@ -22,6 +22,21 @@ Vagrant.configure("2") do |config|
     # Selenium Node
     windows.vm.network "forwarded_port", guest: 5555, host: 5555
 
+    # Copy files to the VM
+    # NOTE: `synced_folder` is not available for now because rsync is not installed in the base image
+    # NOTE: Remove the target folder before re-provisioning, otherwise it will
+    #       be nested in the target folder, not replaced
+    windows.vm.provision "shell",
+      powershell_args: "-ExecutionPolicy Bypass -NoProfile",
+      inline: <<~SCRIPT
+        Remove-Item -Recurse -Force "C:/vagrant/deploy/aws-codedeploy" -ErrorAction Ignore
+      SCRIPT
+    windows.vm.provision "file", source: "../../deploy/aws-codedeploy", destination: "C:/vagrant/deploy/aws-codedeploy"
+
+    # NOTE: To test with local sources, use `git archive HEAD --format zip --output source.zip && mv source.zip "$(git rev-parse --show-toplevel)/deploy/aws-codedeploy/"`
+    #       to create the archive and copy it to the VM
+    # windows.vm.provision "file", source: "source.zip", destination: "C:/app.zip"
+
     # Install requirements
     windows.vm.provision "shell",
       powershell_args: "-ExecutionPolicy Bypass -NoProfile",
@@ -109,8 +124,8 @@ Vagrant.configure("2") do |config|
         # Configure the service to log output to files
         nssm set $serviceName AppStdout "$stdoutLog"
         nssm set $serviceName AppStderr "$stderrLog"
-        nssm set $serviceName AppRotateFiles 1
-        nssm set $serviceName AppRotateOnline 1
+        nssm set $serviceName AppRotateFiles 1 # Enable log file rotation
+        nssm set $serviceName AppRotateOnline 1 # Rotate logs while the service is running
         nssm set $serviceName AppRotateSeconds 86400 # 1 day
 
         Set-Service -Name $serviceName -StartupType Automatic

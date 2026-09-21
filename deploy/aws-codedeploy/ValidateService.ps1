@@ -2,11 +2,12 @@ $ErrorActionPreference = 'Continue'
 
 $Uri = "http://localhost:8000"
 
-# Try up to 100 times (about 300 seconds)
-$maxRetries = 100
+# Try up to 30 times (about 150 seconds)
+$maxRetries = 30
 $retryCount = 0
 $sleepDuration = 5
 
+Write-Host "Starting health check for $Uri; will retry up to $maxRetries times with $sleepDuration seconds interval."
 while ($retryCount -lt $maxRetries) {
     Write-Host "Attempting health check... ($($retryCount + 1) / $maxRetries)"
     try {
