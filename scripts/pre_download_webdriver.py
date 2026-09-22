@@ -19,7 +19,7 @@ def pre_download_webdriver() -> None:
     finally:
         wd.quit()
 
-    print("Finished pre-downloading the webdriver.")
+    print(f"Finished pre-downloading the webdriver: {service.path}")
 
 
 if __name__ == "__main__":
