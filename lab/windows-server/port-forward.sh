@@ -14,6 +14,6 @@ host_port="${1:-3389}"
 vm_port="${2:-3389}"
 
 # Get VM IP: e.g. 192.168.121.59
-vm_ip="$(vagrant ssh-config windows | sed --quiet --regexp-extended 's/HostName (.+)/\1/p' | xargs echo -n)"
+vm_ip="$(sudo vagrant ssh-config windows | sed --quiet --regexp-extended 's/HostName (.+)/\1/p' | xargs echo -n)"
 
 exec socat "tcp-listen:${host_port},reuseaddr,fork" "tcp:${vm_ip}:${vm_port}"

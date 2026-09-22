@@ -21,6 +21,7 @@ def pre_download_webdriver() -> None:
 
     print("Running webdriver...")
     service = Service(log_output=str(logs_dir / "pre_download_webdriver.log"))
+    wd = None
     try:
         wd = webdriver.Chrome(options=options, service=service)
         wd.execute_cdp_cmd(
@@ -32,12 +33,13 @@ def pre_download_webdriver() -> None:
                 "mobile": False,
             },
         )
-        wd.get("https://www.google.com")
+        wd.get("data:,webdriver-ready")
         wd.get_screenshot_as_file(
             str(dump_dir / "pre_download_webdriver_screenshot.png")
         )
     finally:
-        wd.quit()
+        if wd is not None:
+            wd.quit()
 
     print(f"Finished pre-downloading the webdriver: {service.path}")
 

@@ -19,7 +19,7 @@ if ($service.Status -eq 'Running') {
   nssm stop "$serviceName"
 
   while ($elapsedTime -lt $gracePeriodSec -and $service.Status -eq 'Running') {
-    $processes = Get-Process -Name 'python' -ErrorAction SilentlyContinue | Where-Path { $_.Path -like 'C:\app\*' }
+    $processes = Get-Process -Name 'python' -ErrorAction SilentlyContinue | Where-Object { $_.Path -like 'C:\app\*' }
     if (-Not $processes) {
       Write-Output "All application processes shut down successfully."
       break

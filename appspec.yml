@@ -11,7 +11,7 @@ hooks:
       timeout: 30
   BeforeInstall:
     - location: deploy\aws-codedeploy\BeforeInstall.ps1
-      timeout: 30
+      timeout: 60
   AfterInstall:
     - location: deploy\aws-codedeploy\AfterInstall.ps1
       timeout: 180
@@ -20,4 +20,4 @@ hooks:
       timeout: 30
   ValidateService:
     - location: deploy\aws-codedeploy\ValidateService.ps1
-      timeout: 60
+      timeout: 130
