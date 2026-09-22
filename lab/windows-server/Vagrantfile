@@ -26,16 +26,14 @@ Vagrant.configure("2") do |config|
     # NOTE: `synced_folder` is not available for now because rsync is not installed in the base image
     # NOTE: Remove the target folder before re-provisioning, otherwise it will
     #       be nested in the target folder, not replaced
+    windows.vm.provision "file", source: "app.zip", destination: "C:/app.zip"
     windows.vm.provision "shell",
       powershell_args: "-ExecutionPolicy Bypass -NoProfile",
       inline: <<~SCRIPT
-        Remove-Item -Recurse -Force "C:/vagrant/deploy/aws-codedeploy" -ErrorAction Ignore
+        if (Test-Path -Path "C:/app.zip") {
+          Expand-Archive -Path "C:/app.zip" -DestinationPath "C:/app" -Force
+        }
       SCRIPT
-    windows.vm.provision "file", source: "../../deploy/aws-codedeploy", destination: "C:/vagrant/deploy/aws-codedeploy"
-
-    # NOTE: To test with local sources, use `git archive HEAD --format zip --output source.zip && mv source.zip "$(git rev-parse --show-toplevel)/deploy/aws-codedeploy/"`
-    #       to create the archive and copy it to the VM
-    # windows.vm.provision "file", source: "source.zip", destination: "C:/app.zip"
 
     # Install requirements
     windows.vm.provision "shell",
