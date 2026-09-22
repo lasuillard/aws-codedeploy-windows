@@ -22,8 +22,8 @@ class Settings(BaseSettings):
     dump_dir: Path = base_dir / "dump"
     """Directory holding dump files."""
 
-    selenium_hub_url: str = "http://localhost:4444"
-    """URL of Selenium Hub for remote webdriver."""
+    selenium_hub_url: str | None = None
+    """URL of Selenium Hub for remote webdriver. If not set, local webdriver will be used."""
 
     @model_validator(mode="after")
     def _create_directories(self) -> Self:

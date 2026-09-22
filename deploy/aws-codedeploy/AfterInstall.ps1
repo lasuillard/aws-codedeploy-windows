@@ -20,3 +20,6 @@ Set-Location "C:\\app"
 # Install Python and dependencies
 uv python install
 uv sync --frozen
+
+# Pre-download the webdriver
+uv run --frozen python .\scripts\pre_download_webdriver.py
