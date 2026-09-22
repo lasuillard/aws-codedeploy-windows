@@ -5,9 +5,8 @@ Write-Output 'Installing uv...'
 Invoke-RestMethod "https://astral.sh/uv/install.ps1" | Invoke-Expression
 
 $uvPath = "$env:USERPROFILE\.local\bin"
-if (-not ($env:Path -like "*$uvPath*")) {
+if (-not ($env:Path -like "*${uvPath}*")) {
   $env:PATH = "$uvPath;$env:PATH"
-  Write-Output "Added $uvPath to PATH"
 }
 
 # Verify uv installation
