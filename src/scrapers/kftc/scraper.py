@@ -73,6 +73,7 @@ class KftcScraper:
                 options=options,
             )
 
+        self._webdriver.maximize_window()
         return self._webdriver
 
     def __enter__(self) -> Self:
