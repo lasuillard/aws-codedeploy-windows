@@ -6,6 +6,15 @@ selenium_hub_url = ENV['SELENIUM_HUB_URL'] || 'http://<your-ip>:4444'
 openjdk_version = "22.0.1"
 nssm_version = "2.24.101.20180116"
 
+# HACK: Workaround to include the app.zip in the VM before provisioning
+current_cmd = ARGV.join(" ")
+if current_cmd =~ /up|provision|reload/i && !ARGV.include?("--no-provision")
+  FileUtils.rm_f("app.zip")
+  system('cd "$(git rev-parse --show-toplevel)" && git archive HEAD --format zip --output lab/windows-server/app.zip')
+else
+  FileUtils.touch("app.zip") unless File.exist?("app.zip")
+end
+
 Vagrant.configure("2") do |config|
   config.vm.define "windows" do |windows|
     windows.vm.box = "jborean93/WindowsServer2022"
