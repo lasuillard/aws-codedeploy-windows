@@ -31,6 +31,8 @@
             pulumi-bin
             awscli2
             pulumiPackages.pulumi-python
+            chromium
+            chromedriver
           ];
 
           shellHook = ''
@@ -48,6 +50,10 @@
 
             # Workaround for pre-commit leaking its dependencies into the environment
             unset PYTHONPATH
+
+            # Use installed browser and webdriver for Selenium
+            export SE_CHROME_PATH="${pkgs.chromium}/bin/chromium"
+            export SE_CHROMEDRIVER="${pkgs.chromedriver}/bin/chromedriver"
           '';
         };
       }

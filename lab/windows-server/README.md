@@ -24,9 +24,7 @@ Follow these steps to provision the VM:
 
 Vagrant has built-in port forwarding capability. You can use `vagrant rdp` or `vagrant ssh` to access the VM.
 
-To access to the VM from other machines is required, use `socat` as a simple and straightforward alternative.
-
-You can use the `port-forward.sh` helper script to forward the RDP port (3389) to the host machine. Run the following command in a terminal:
+If access to the VM from other machines is required, use `socat` as a simple and straightforward alternative. You can use the `port-forward.sh` helper script, which uses `socat` to forward the RDP port (3389) to the host machine. Run the following command in a terminal:
 
 ```bash
 $ ./port-forward.sh 3389 3389

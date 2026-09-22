@@ -5,8 +5,9 @@ from pathlib import Path
 from types import TracebackType
 from typing import TYPE_CHECKING, Any, Self
 
+from selenium.webdriver.chrome.service import Service
 from selenium.common.exceptions import NoAlertPresentException, TimeoutException
-from selenium.webdriver import ChromeOptions, Remote
+from selenium.webdriver import Chrome, ChromeOptions, Remote
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
@@ -53,16 +54,38 @@ class KftcScraper:
 
     def _get_webdriver(self) -> Remote:
         options = ChromeOptions()
-        options.set_capability("platformName", "WINDOWS")
 
         # Disable "... wants to: Access other apps and services on this device" prompt
         # https://peter.sh/experiments/chromium-command-line-switches/#disable-web-security
         options.add_argument("--disable-web-security")
+        options.add_argument("--headless=new")
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("--window-size=1920,1080")
+        options.add_argument("--force-device-scale-factor=1")
 
-        self._webdriver = Remote(
-            command_executor=settings.selenium_hub_url,
-            options=options,
-        )
+        if settings.selenium_hub_url is None:
+            service = Service(log_output="browser.log")
+            self._webdriver = Chrome(options=options, service=service)
+
+            # NOTE: New headless mode viewport is restricted by the OS display resolution.
+            #       So we need to explicitly set the device metrics to match the desired viewport size.
+            self._webdriver.execute_cdp_cmd(
+                "Emulation.setDeviceMetricsOverride",
+                {
+                    "width": 1920,
+                    "height": 1080,
+                    "deviceScaleFactor": 1,
+                    "mobile": False,
+                },
+            )
+        else:
+            options.set_capability("platformName", "WINDOWS")
+            self._webdriver = Remote(
+                command_executor=settings.selenium_hub_url,
+                options=options,
+            )
+
         return self._webdriver
 
     def __enter__(self) -> Self:

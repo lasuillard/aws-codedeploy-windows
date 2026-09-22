@@ -6,6 +6,15 @@ selenium_hub_url = ENV['SELENIUM_HUB_URL'] || 'http://<your-ip>:4444'
 openjdk_version = "22.0.1"
 nssm_version = "2.24.101.20180116"
 
+# HACK: Workaround to include the app.zip in the VM before provisioning
+current_cmd = ARGV.join(" ")
+if current_cmd =~ /up|provision|reload/i && !ARGV.include?("--no-provision")
+  FileUtils.rm_f("app.zip")
+  system('cd "$(git rev-parse --show-toplevel)" && git archive HEAD --format zip --output lab/windows-server/app.zip')
+else
+  FileUtils.touch("app.zip") unless File.exist?("app.zip")
+end
+
 Vagrant.configure("2") do |config|
   config.vm.define "windows" do |windows|
     windows.vm.box = "jborean93/WindowsServer2022"
@@ -21,6 +30,19 @@ Vagrant.configure("2") do |config|
 
     # Selenium Node
     windows.vm.network "forwarded_port", guest: 5555, host: 5555
+
+    # Copy files to the VM
+    # NOTE: `synced_folder` is not available for now because rsync is not installed in the base image
+    # NOTE: Remove the target folder before re-provisioning, otherwise it will
+    #       be nested in the target folder, not replaced
+    windows.vm.provision "file", source: "app.zip", destination: "C:/app.zip"
+    windows.vm.provision "shell",
+      powershell_args: "-ExecutionPolicy Bypass -NoProfile",
+      inline: <<~SCRIPT
+        if (Test-Path -Path "C:/app.zip") {
+          Expand-Archive -Path "C:/app.zip" -DestinationPath "C:/app" -Force
+        }
+      SCRIPT
 
     # Install requirements
     windows.vm.provision "shell",
@@ -109,8 +131,8 @@ Vagrant.configure("2") do |config|
         # Configure the service to log output to files
         nssm set $serviceName AppStdout "$stdoutLog"
         nssm set $serviceName AppStderr "$stderrLog"
-        nssm set $serviceName AppRotateFiles 1
-        nssm set $serviceName AppRotateOnline 1
+        nssm set $serviceName AppRotateFiles 1 # Enable log file rotation
+        nssm set $serviceName AppRotateOnline 1 # Rotate logs while the service is running
         nssm set $serviceName AppRotateSeconds 86400 # 1 day
 
         Set-Service -Name $serviceName -StartupType Automatic

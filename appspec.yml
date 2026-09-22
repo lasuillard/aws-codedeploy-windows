@@ -9,12 +9,15 @@ hooks:
   ApplicationStop:
     - location: deploy\aws-codedeploy\ApplicationStop.ps1
       timeout: 30
+  BeforeInstall:
+    - location: deploy\aws-codedeploy\BeforeInstall.ps1
+      timeout: 60
   AfterInstall:
     - location: deploy\aws-codedeploy\AfterInstall.ps1
-      timeout: 300
+      timeout: 180
   ApplicationStart:
     - location: deploy\aws-codedeploy\ApplicationStart.ps1
-      timeout: 60
+      timeout: 30
   ValidateService:
     - location: deploy\aws-codedeploy\ValidateService.ps1
-      timeout: 120
+      timeout: 130

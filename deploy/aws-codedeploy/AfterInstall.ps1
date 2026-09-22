@@ -1,14 +1,24 @@
 $ErrorActionPreference = 'Stop'
 
-Set-Location C:\app
+# Install uv
+Write-Output 'Installing uv...'
+Invoke-RestMethod "https://astral.sh/uv/install.ps1" | Invoke-Expression
 
-# Install pipx
-python -m pip install pipx
-python -m pipx ensurepath --force
+$uvPath = "$env:USERPROFILE\.local\bin"
+if (-not ($env:Path -like "*${uvPath}*")) {
+  $env:PATH = "$uvPath;$env:PATH"
+}
 
-# Install core utils
-python -m pipx install uv aws-annoying
+# Verify uv installation
+uv --version
 
-# Install dependencies
-python -m pipx run uv python install
-python -m pipx run uv sync --frozen
+# Navigate to app directory
+New-Item -ItemType Directory -Path "C:\\app" -Force | Out-Null
+Set-Location "C:\\app"
+
+# Install Python and dependencies
+uv python install
+uv sync --frozen
+
+# Pre-download the webdriver
+uv run --frozen python .\scripts\pre_download_webdriver.py
