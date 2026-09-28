@@ -1,6 +1,9 @@
 from pulumi import export
 
-from . import app_lb, app_server, deployment, deployment_artifact
+import app_lb
+import app_server
+import deployment
+import deployment_artifact
 
 # SSH Key to access the Windows instances in the ASG
 export("asg.ssh-key.private-key", app_server.ssh_key.private_key_pem)

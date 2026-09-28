@@ -1,10 +1,14 @@
 import pulumi_aws as aws
 
-from . import app_server, common, dynamic, imagebuilder_components, network
-from .components.iam import Role
+import app_server
+import common
+import dynamic
+import imagebuilder_components
+import network
+from components.iam import Role
 
 partition = aws.get_partition().partition
-region = aws.get_region().name
+region = aws.get_region().region
 account_id = aws.get_caller_identity().account_id
 
 # EC2 Image Builder Infrastructure

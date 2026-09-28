@@ -1,6 +1,6 @@
 import pulumi_awsx as awsx
 
-from . import common
+import common
 
 vpc = awsx.ec2.Vpc(
     common.full_name,

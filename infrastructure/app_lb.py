@@ -2,7 +2,8 @@ import pulumi_aws as aws
 import pulumi_random as random
 from pulumi import Output
 
-from . import common, network
+import common
+import network
 
 sg = aws.ec2.SecurityGroup(
     "app",

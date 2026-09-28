@@ -6,8 +6,11 @@ import pulumi_tls as tls
 from pulumi import Output, ResourceOptions
 from pulumi_extra import render_template
 
-from . import app_lb, common, deployment_artifact, network
-from .components.iam import Role
+import app_lb
+import common
+import deployment_artifact
+import network
+from components.iam import Role
 
 # * AMI built from image builder is not available at the provisioning time
 # * so we need to trigger a new build to get the latest AMI and distribute it

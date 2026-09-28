@@ -4,8 +4,10 @@ import pulumi_tls as tls
 from pulumi import Config, Output, log
 from pulumi_github.get_repository import AwaitableGetRepositoryResult
 
-from . import common, deployment, deployment_artifact
-from .components.iam import Role
+import common
+import deployment
+import deployment_artifact
+from components.iam import Role
 
 config = Config()
 

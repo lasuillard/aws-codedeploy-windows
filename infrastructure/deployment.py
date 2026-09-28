@@ -1,7 +1,8 @@
 import pulumi_aws as aws
 
-from . import app_server, common
-from .components.iam import Role
+import app_server
+import common
+from components.iam import Role
 
 app = aws.codedeploy.Application(
     "app",
