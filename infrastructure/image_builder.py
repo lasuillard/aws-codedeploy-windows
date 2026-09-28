@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pulumi_aws as aws
 
-from . import asg, dynamic, metadata, vpc
+from . import asg, common, dynamic, vpc
 from .components.iam import Role
 
 partition = aws.get_partition().partition
@@ -13,7 +13,7 @@ account_id = aws.get_caller_identity().account_id
 # ----------------------------------------------------------------------------
 security_group = aws.ec2.SecurityGroup(
     "imagebuilder",
-    name=f"{metadata.full_name}-imagebuilder",
+    name=f"{common.full_name}-imagebuilder",
     description="Security group for instances managed by EC2 Image Builder.",
     vpc_id=vpc.vpc.vpc_id,
     ingress=[],
@@ -25,7 +25,7 @@ security_group = aws.ec2.SecurityGroup(
 instance_role = (
     Role(
         "imagebuilder-instance-role",
-        name=f"{metadata.full_name}-imagebuilder-instance-role",
+        name=f"{common.full_name}-imagebuilder-instance-role",
     )
     .assumable(services=["ec2.amazonaws.com"])
     .with_policies(
@@ -39,12 +39,12 @@ instance_role = (
 )
 instance_profile = aws.iam.InstanceProfile(
     "imagebuilder",
-    name=f"{metadata.full_name}-imagebuilder",
+    name=f"{common.full_name}-imagebuilder",
     role=instance_role.name,
 )
 default_infra_config = aws.imagebuilder.InfrastructureConfiguration(
     "default",
-    name=f"{metadata.full_name}-imagebuilder",
+    name=f"{common.full_name}-imagebuilder",
     description="Default image builder infrastructure configuration.",
     instance_profile_name=instance_profile.name,
     instance_types=["t3a.large", "t3.large", "t3a.medium", "t3.medium"],
@@ -66,7 +66,7 @@ install_kftcvan_security_program = aws.imagebuilder.Component(
     data=(components_dir / "install-kftcvan-security-program.yaml").read_text(),
     skip_destroy=False,
 )
-image_name = f"{metadata.full_name}-imagebuilder"
+image_name = f"{common.full_name}-imagebuilder"
 image_recipe = aws.imagebuilder.ImageRecipe(
     "windows-fleet",
     name=image_name,
@@ -111,14 +111,14 @@ log_group = aws.cloudwatch.LogGroup(
 )
 distro_config = aws.imagebuilder.DistributionConfiguration(
     "windows-fleet",
-    name=f"{metadata.full_name}-imagebuilder",
+    name=f"{common.full_name}-imagebuilder",
     description="Distribution configuration for Windows Server 2022 with CodeDeploy.",
     distributions=[
         {
             "region": region,
             "ami_distribution_configuration": {
                 # BUG: AMI name format shown in console like: "aws-codedeploy-windows-{{" (but works OK)
-                "name": metadata.full_name + "-{{ imagebuilder:buildDate }}",
+                "name": common.full_name + "-{{ imagebuilder:buildDate }}",
             },
             "launch_template_configurations": [
                 {
@@ -133,7 +133,7 @@ distro_config = aws.imagebuilder.DistributionConfiguration(
 
 image_pipeline = aws.imagebuilder.ImagePipeline(
     "windows-fleet",
-    name=f"{metadata.full_name}-imagebuilder",
+    name=f"{common.full_name}-imagebuilder",
     description="Image build pipeline for Windows Server 2022 with CodeDeploy.",
     image_recipe_arn=image_recipe.arn,
     execution_role=aws.iam.get_role("AWSServiceRoleForImageBuilder").arn,
@@ -165,7 +165,7 @@ dynamic.CleanupImagePipeline(
 lifecycle_policy_role = (
     Role(
         "imagebuilder-lifecycle-role",
-        name=f"{metadata.full_name}-imagebuilder-lifecycle-role",
+        name=f"{common.full_name}-imagebuilder-lifecycle-role",
     )
     .assumable(services=["imagebuilder.amazonaws.com"])
     .with_policies(
@@ -177,7 +177,7 @@ lifecycle_policy_role = (
 )
 aws.imagebuilder.LifecyclePolicy(
     "imagebuilder-lifecycle",
-    name=f"{metadata.full_name}-imagebuilder",
+    name=f"{common.full_name}-imagebuilder",
     execution_role=lifecycle_policy_role.arn,
     resource_type="AMI_IMAGE",
     policy_details=[

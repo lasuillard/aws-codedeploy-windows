@@ -6,7 +6,7 @@ import pulumi_tls as tls
 from pulumi import Output, ResourceOptions
 from pulumi_extra import render_template
 
-from . import alb, codedeploy, metadata, vpc
+from . import alb, codedeploy, common, vpc
 from .components.iam import Role
 
 # * AMI built from image builder is not available at the provisioning time
@@ -23,12 +23,12 @@ ssh_key = tls.PrivateKey(
 )
 key_pair = aws.ec2.KeyPair(
     "windows-fleet",
-    key_name=f"{metadata.full_name}-windows-fleet",
+    key_name=f"{common.full_name}-windows-fleet",
     public_key=ssh_key.public_key_openssh,
 )
 security_group = aws.ec2.SecurityGroup(
     "windows-fleet",
-    name=f"{metadata.full_name}-windows-fleet",
+    name=f"{common.full_name}-windows-fleet",
     vpc_id=vpc.vpc.vpc_id,
     ingress=[
         {
@@ -54,7 +54,7 @@ security_group = aws.ec2.SecurityGroup(
 instance_role = (
     Role(
         "windows-fleet",
-        name=f"{metadata.full_name}-windows-fleet",
+        name=f"{common.full_name}-windows-fleet",
     )
     .with_policies(
         arns=[
@@ -82,7 +82,7 @@ instance_role = (
 )
 instance_profile = aws.iam.InstanceProfile(
     "windows-fleet",
-    name=f"{metadata.full_name}-windows-fleet",
+    name=f"{common.full_name}-windows-fleet",
     role=instance_role.name,
 )
 launch_template = aws.ec2.LaunchTemplate(
@@ -94,7 +94,7 @@ launch_template = aws.ec2.LaunchTemplate(
             "image_id",
         ],
     ),
-    name=f"{metadata.full_name}-windows-fleet",
+    name=f"{common.full_name}-windows-fleet",
     update_default_version=True,
     image_id=ami.id,
     instance_requirements={
@@ -118,7 +118,7 @@ asg = aws.autoscaling.Group(
     opts=ResourceOptions(
         ignore_changes=["desired_capacity", "min_size", "max_size"],
     ),
-    name=f"{metadata.full_name}-windows-fleet",
+    name=f"{common.full_name}-windows-fleet",
     vpc_zone_identifiers=vpc.vpc.private_subnet_ids,
     desired_capacity=1,
     min_size=1,
@@ -155,7 +155,7 @@ asg = aws.autoscaling.Group(
     tags=[
         {
             "key": "Name",
-            "value": f"{metadata.full_name}-windows-fleet",
+            "value": f"{common.full_name}-windows-fleet",
             "propagate_at_launch": True,
         },
     ],

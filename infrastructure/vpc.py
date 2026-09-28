@@ -1,9 +1,9 @@
 import pulumi_awsx as awsx
 
-from . import metadata
+from . import common
 
 vpc = awsx.ec2.Vpc(
-    metadata.full_name,
+    common.full_name,
     cidr_block="172.31.0.0/16",
     number_of_availability_zones=3,
     enable_dns_hostnames=True,

@@ -4,7 +4,7 @@ import pulumi_tls as tls
 from pulumi import Config, Output, log
 from pulumi_github.get_repository import AwaitableGetRepositoryResult
 
-from . import codedeploy, codedeploy_application, metadata
+from . import codedeploy, codedeploy_application, common
 from .components.iam import Role
 
 config = Config()
@@ -17,13 +17,13 @@ def main() -> None:
         full_name=repository_fullname
     )
     certificate = tls.get_certificate(
-        url=f"https://{metadata.gha_oidc_provider_domain}/.well-known/openid-configuration",
+        url=f"https://{common.gha_oidc_provider_domain}/.well-known/openid-configuration",
     )
 
     # Create GitHub OIDC provider if not exists
     try:
         aws.iam.get_open_id_connect_provider(
-            url=f"https://{metadata.gha_oidc_provider_domain}"
+            url=f"https://{common.gha_oidc_provider_domain}"
         )
     except Exception as err:
         if "not found" not in str(err):
@@ -31,7 +31,7 @@ def main() -> None:
 
         _gha_oidc_provider = aws.iam.OpenIdConnectProvider(
             "github-actions",
-            url=f"https://{metadata.gha_oidc_provider_domain}",
+            url=f"https://{common.gha_oidc_provider_domain}",
             thumbprint_lists=[
                 # https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_create_oidc_verify-thumbprint.html
                 certificate.certificates[0].sha1_fingerprint,
@@ -45,7 +45,7 @@ def main() -> None:
             name_prefix="GitHub-Actions-",
         )
         .assumable_with_oidc(
-            metadata.gha_oidc_provider_domain,
+            common.gha_oidc_provider_domain,
             oidc_subjects_with_wildcards=[
                 Output.format(
                     "repo:{full_name}:*",
