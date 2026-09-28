@@ -6,7 +6,7 @@ import pulumi_tls as tls
 from pulumi import Output, ResourceOptions
 from pulumi_extra import render_template
 
-from . import alb, codedeploy, common, vpc
+from . import app_lb, common, deployment_artifact, network
 from .components.iam import Role
 
 # * AMI built from image builder is not available at the provisioning time
@@ -29,13 +29,13 @@ key_pair = aws.ec2.KeyPair(
 security_group = aws.ec2.SecurityGroup(
     "windows-fleet",
     name=f"{common.full_name}-windows-fleet",
-    vpc_id=vpc.vpc.vpc_id,
+    vpc_id=network.vpc.vpc_id,
     ingress=[
         {
             "protocol": "tcp",
             "from_port": 8000,
             "to_port": 8000,
-            "security_groups": [alb.security_group.id],
+            "security_groups": [app_lb.sg.id],
         },
         {
             # ! Allow RDP access from anywhere, for testing purposes only
@@ -70,8 +70,10 @@ instance_role = (
                         "effect": "Allow",
                         "actions": ["s3:Get*", "s3:List*"],
                         "resources": [
-                            codedeploy.build_artifacts.arn,
-                            Output.concat(codedeploy.build_artifacts.arn, "/*"),
+                            deployment_artifact.build_artifacts.arn,
+                            Output.concat(
+                                deployment_artifact.build_artifacts.arn, "/*"
+                            ),
                         ],
                     },
                 ],
@@ -119,12 +121,12 @@ asg = aws.autoscaling.Group(
         ignore_changes=["desired_capacity", "min_size", "max_size"],
     ),
     name=f"{common.full_name}-windows-fleet",
-    vpc_zone_identifiers=vpc.vpc.private_subnet_ids,
+    vpc_zone_identifiers=network.vpc.private_subnet_ids,
     desired_capacity=1,
     min_size=1,
     max_size=3,
     health_check_type="EC2",
-    target_group_arns=[alb.target_group.arn],
+    target_group_arns=[app_lb.target_group.arn],
     mixed_instances_policy={
         "launch_template": {
             "launch_template_specification": {

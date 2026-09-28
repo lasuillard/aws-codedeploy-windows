@@ -2,12 +2,12 @@ import pulumi_aws as aws
 import pulumi_random as random
 from pulumi import Output
 
-from . import common, vpc
+from . import common, network
 
-security_group = aws.ec2.SecurityGroup(
+sg = aws.ec2.SecurityGroup(
     "app",
     name=f"{common.full_name}",
-    vpc_id=vpc.vpc.vpc_id,
+    vpc_id=network.vpc.vpc_id,
     ingress=[
         # Allow all inbound traffic
         {"protocol": "-1", "from_port": 0, "to_port": 0, "cidr_blocks": ["0.0.0.0/0"]},
@@ -28,9 +28,9 @@ load_balancer = aws.lb.LoadBalancer(
     "app",
     name=lb_name,
     load_balancer_type="application",
-    subnets=vpc.vpc.public_subnet_ids,
+    subnets=network.vpc.public_subnet_ids,
     internal=False,
-    security_groups=[security_group.id],
+    security_groups=[sg.id],
     idle_timeout=300,  # Scraping can take a while for complex sites
 )
 
@@ -55,7 +55,7 @@ listener_80 = aws.lb.Listener(
 target_group = aws.lb.TargetGroup(
     "app-8000",
     name=f"{common.full_name}-8000",
-    vpc_id=vpc.vpc.vpc_id,
+    vpc_id=network.vpc.vpc_id,
     protocol="HTTP",
     port=8000,
     health_check={

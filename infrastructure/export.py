@@ -1,26 +1,26 @@
 from pulumi import export
 
-from . import alb, asg, codedeploy, codedeploy_application
+from . import app_lb, app_server, deployment, deployment_artifact
 
 # SSH Key to access the Windows instances in the ASG
-export("asg.ssh-key.private-key", asg.ssh_key.private_key_pem)
+export("asg.ssh-key.private-key", app_server.ssh_key.private_key_pem)
 
 # CodeDeploy configuration to deploy the application
 export(
     "codedeploy.build-artifacts",
-    codedeploy.build_artifacts.bucket,
+    deployment_artifact.build_artifacts.bucket,
 )
 export(
     "codedeploy.application-name",
-    codedeploy_application.app.name,
+    deployment.app.name,
 )
 export(
     "codedeploy.deployment-group-name",
-    codedeploy_application.deployment_group.deployment_group_name,
+    deployment.deployment_group.deployment_group_name,
 )
 
 # ALB domain name to access the application
 export(
     "alb.dns-name",
-    alb.load_balancer.dns_name,
+    app_lb.load_balancer.dns_name,
 )

@@ -4,7 +4,7 @@ import pulumi_tls as tls
 from pulumi import Config, Output, log
 from pulumi_github.get_repository import AwaitableGetRepositoryResult
 
-from . import codedeploy, codedeploy_application, common
+from . import common, deployment, deployment_artifact
 from .components.iam import Role
 
 config = Config()
@@ -79,9 +79,9 @@ def main() -> None:
     # Actions variables
     for key, value in {
         "AWS_REGION": aws.get_region().name,
-        "S3_BUCKET": codedeploy.build_artifacts.bucket,
-        "CODEDEPLOY_APPLICATION_NAME": codedeploy_application.app.name,
-        "CODEDEPLOY_DEPLOYMENT_GROUP_NAME": codedeploy_application.deployment_group.deployment_group_name,
+        "S3_BUCKET": deployment_artifact.build_artifacts.bucket,
+        "CODEDEPLOY_APPLICATION_NAME": deployment.app.name,
+        "CODEDEPLOY_DEPLOYMENT_GROUP_NAME": deployment.deployment_group.deployment_group_name,
     }.items():
         github.ActionsEnvironmentVariable(
             key,

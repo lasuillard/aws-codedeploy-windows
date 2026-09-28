@@ -1,8 +1,6 @@
-from pathlib import Path
-
 import pulumi_aws as aws
 
-from . import asg, common, dynamic, vpc
+from . import app_server, common, dynamic, imagebuilder_components, network
 from .components.iam import Role
 
 partition = aws.get_partition().partition
@@ -15,7 +13,7 @@ security_group = aws.ec2.SecurityGroup(
     "imagebuilder",
     name=f"{common.full_name}-imagebuilder",
     description="Security group for instances managed by EC2 Image Builder.",
-    vpc_id=vpc.vpc.vpc_id,
+    vpc_id=network.vpc.vpc_id,
     ingress=[],
     egress=[
         # Allow all outbound traffic
@@ -48,7 +46,7 @@ default_infra_config = aws.imagebuilder.InfrastructureConfiguration(
     description="Default image builder infrastructure configuration.",
     instance_profile_name=instance_profile.name,
     instance_types=["t3a.large", "t3.large", "t3a.medium", "t3.medium"],
-    subnet_id=vpc.vpc.private_subnet_ids[0],
+    subnet_id=network.vpc.private_subnet_ids[0],
     security_group_ids=[security_group.id],
 )
 
@@ -56,16 +54,6 @@ default_infra_config = aws.imagebuilder.InfrastructureConfiguration(
 # ----------------------------------------------------------------------------
 # * AutoLogon configuration gets removed by the Image Builder service (SysPrep),
 # * so each instance should do on their own user data script to enable it
-components_dir = Path(__file__).parent / "imagebuilder-components"
-install_kftcvan_security_program = aws.imagebuilder.Component(
-    "install-kftcvan-security-program",
-    name="Install-KFTCVAN-Security-Program",
-    version="1.0.0",
-    platform="Windows",
-    supported_os_versions=["Microsoft Windows Server 2022"],
-    data=(components_dir / "install-kftcvan-security-program.yaml").read_text(),
-    skip_destroy=False,
-)
 image_name = f"{common.full_name}-imagebuilder"
 image_recipe = aws.imagebuilder.ImageRecipe(
     "windows-fleet",
@@ -96,7 +84,7 @@ image_recipe = aws.imagebuilder.ImageRecipe(
             "parameters": [],
         },
         {
-            "component_arn": install_kftcvan_security_program.arn,
+            "component_arn": imagebuilder_components.install_kftcvan_security_program.arn,
             "parameters": [],
         },
     ],
@@ -123,7 +111,7 @@ distro_config = aws.imagebuilder.DistributionConfiguration(
             "launch_template_configurations": [
                 {
                     "account_id": account_id,
-                    "launch_template_id": asg.launch_template.id,
+                    "launch_template_id": app_server.asg.launch_template.id,
                     "default": True,
                 },
             ],
