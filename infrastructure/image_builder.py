@@ -2,7 +2,8 @@ from pathlib import Path
 
 import pulumi_aws as aws
 
-from . import asg, components, dynamic, metadata, vpc
+from . import asg, dynamic, metadata, vpc
+from .components.iam import Role
 
 partition = aws.get_partition().partition
 region = aws.get_region().name
@@ -22,7 +23,7 @@ security_group = aws.ec2.SecurityGroup(
     ],
 )
 instance_role = (
-    components.Role(
+    Role(
         "imagebuilder-instance-role",
         name=f"{metadata.full_name}-imagebuilder-instance-role",
     )
@@ -162,7 +163,7 @@ dynamic.CleanupImagePipeline(
 # * This lifecycle may not be helpful for deleting AMIs not managed by this IaC,
 # * because the resources will be deleted on stack destroy, including this policy.
 lifecycle_policy_role = (
-    components.Role(
+    Role(
         "imagebuilder-lifecycle-role",
         name=f"{metadata.full_name}-imagebuilder-lifecycle-role",
     )

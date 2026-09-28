@@ -4,7 +4,8 @@ import pulumi_tls as tls
 from pulumi import Config, Output, log
 from pulumi_github.get_repository import AwaitableGetRepositoryResult
 
-from . import codedeploy, codedeploy_application, components, metadata
+from . import codedeploy, codedeploy_application, metadata
+from .components.iam import Role
 
 config = Config()
 
@@ -39,7 +40,7 @@ def main() -> None:
         )
 
     gha_oidc_role = (
-        components.Role(
+        Role(
             "github-actions",
             name_prefix="GitHub-Actions-",
         )

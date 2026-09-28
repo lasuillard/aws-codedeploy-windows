@@ -6,7 +6,8 @@ import pulumi_tls as tls
 from pulumi import Output, ResourceOptions
 from pulumi_extra import render_template
 
-from . import alb, codedeploy, components, metadata, vpc
+from . import alb, codedeploy, metadata, vpc
+from .components.iam import Role
 
 # * AMI built from image builder is not available at the provisioning time
 # * so we need to trigger a new build to get the latest AMI and distribute it
@@ -51,7 +52,7 @@ security_group = aws.ec2.SecurityGroup(
     ],
 )
 instance_role = (
-    components.Role(
+    Role(
         "windows-fleet",
         name=f"{metadata.full_name}-windows-fleet",
     )

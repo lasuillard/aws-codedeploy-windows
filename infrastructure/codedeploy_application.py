@@ -1,6 +1,7 @@
 import pulumi_aws as aws
 
-from . import asg, components, metadata
+from . import asg, metadata
+from .components.iam import Role
 
 app = aws.codedeploy.Application(
     "app",
@@ -8,7 +9,7 @@ app = aws.codedeploy.Application(
     compute_platform="Server",
 )
 role = (
-    components.Role(
+    Role(
         "codedeploy",
         name=f"{metadata.full_name}-codedeploy",
     )
