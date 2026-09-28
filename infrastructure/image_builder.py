@@ -55,13 +55,14 @@ default_infra_config = aws.imagebuilder.InfrastructureConfiguration(
 # ----------------------------------------------------------------------------
 # * AutoLogon configuration gets removed by the Image Builder service (SysPrep),
 # * so each instance should do on their own user data script to enable it
+components_dir = Path(__file__).parent / "imagebuilder-components"
 install_kftcvan_security_program = aws.imagebuilder.Component(
     "install-kftcvan-security-program",
     name="Install-KFTCVAN-Security-Program",
     version="1.0.0",
     platform="Windows",
     supported_os_versions=["Microsoft Windows Server 2022"],
-    data=(Path(__file__).parent / "install-kftcvan-security-program.yaml").read_text(),
+    data=(components_dir / "install-kftcvan-security-program.yaml").read_text(),
     skip_destroy=False,
 )
 image_name = f"{metadata.full_name}-imagebuilder"
