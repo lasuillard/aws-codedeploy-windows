@@ -13,3 +13,18 @@ dependencies = [
   "boto3==1.38.6",
   "pulumi-github==6.7.2",
 ]
+
+[tool.ruff.lint.isort]
+known-first-party = [
+  "app_lb",
+  "app_server",
+  "common",
+  "components",
+  "deployment_artifact",
+  "deployment",
+  "dynamic",
+  "github",
+  "imagebuilder_components",
+  "imagebuilder",
+  "network",
+]
