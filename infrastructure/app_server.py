@@ -1,16 +1,14 @@
 import base64
 from pathlib import Path
 
-import pulumi_aws as aws
-import pulumi_tls as tls
-from pulumi import Output, ResourceOptions
-from pulumi_extra import render_template
-
 import app_lb
 import common
 import deployment_artifact
 import network
+import pulumi_aws as aws
 from components.iam import Role
+from pulumi import Output, ResourceOptions
+from pulumi_extra import render_template
 
 # * AMI built from image builder is not available at the provisioning time
 # * so we need to trigger a new build to get the latest AMI and distribute it
@@ -18,16 +16,6 @@ ami = aws.ec2.get_ami(
     most_recent=True,
     owners=["amazon"],
     filters=[{"name": "name", "values": ["Windows_Server-2022-English-Full-Base-*"]}],
-)
-ssh_key = tls.PrivateKey(
-    "windows-fleet",
-    algorithm="RSA",  # Windows Server does not support ECDSA yet
-    rsa_bits=3_072,
-)
-key_pair = aws.ec2.KeyPair(
-    "windows-fleet",
-    key_name=f"{common.full_name}-windows-fleet",
-    public_key=ssh_key.public_key_openssh,
 )
 security_group = aws.ec2.SecurityGroup(
     "windows-fleet",
@@ -39,14 +27,6 @@ security_group = aws.ec2.SecurityGroup(
             "from_port": 8000,
             "to_port": 8000,
             "security_groups": [app_lb.sg.id],
-        },
-        {
-            # ! Allow RDP access from anywhere, for testing purposes only
-            # ! In production, update it to accept traffic only from trusted IPs
-            "protocol": "tcp",
-            "from_port": 3389,
-            "to_port": 3389,
-            "cidr_blocks": ["0.0.0.0/0"],
         },
     ],
     egress=[
@@ -109,7 +89,6 @@ launch_template = aws.ec2.LaunchTemplate(
         "burstable_performance": "included",
         "spot_max_price_percentage_over_lowest_price": 100,
     },
-    key_name=key_pair.key_name,
     iam_instance_profile={"arn": instance_profile.arn},
     user_data=render_template(  # ty: ignore[missing-argument]
         Path(__file__).parent / "Bootstrap.userdata.jinja",
