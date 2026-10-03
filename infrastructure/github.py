@@ -80,7 +80,7 @@ def main() -> None:
 
     # Actions variables
     for key, value in {
-        "AWS_REGION": aws.get_region().name,
+        "AWS_REGION": aws.get_region().region,
         "S3_BUCKET": deployment_artifact.build_artifacts.bucket,
         "CODEDEPLOY_APPLICATION_NAME": deployment.app.name,
         "CODEDEPLOY_DEPLOYMENT_GROUP_NAME": deployment.deployment_group.deployment_group_name,
