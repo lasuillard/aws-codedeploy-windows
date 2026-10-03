@@ -1,16 +1,18 @@
 import pulumi_aws as aws
 
-from . import asg, components, metadata
+import app_server
+import common
+from components.iam import Role
 
 app = aws.codedeploy.Application(
     "app",
-    name=metadata.full_name,
+    name=common.full_name,
     compute_platform="Server",
 )
 role = (
-    components.Role(
+    Role(
         "codedeploy",
-        name=f"{metadata.full_name}-codedeploy",
+        name=f"{common.full_name}-codedeploy",
     )
     .assumable(services=["codedeploy.amazonaws.com"])
     .with_policies(arns=[aws.iam.ManagedPolicy.AWS_CODE_DEPLOY_ROLE])
@@ -19,9 +21,9 @@ role = (
 deployment_group = aws.codedeploy.DeploymentGroup(
     "app",
     app_name=app.name,
-    deployment_group_name=f"{metadata.full_name}-windows-fleet",
+    deployment_group_name=f"{common.full_name}-windows-fleet",
     service_role_arn=role.arn,
-    autoscaling_groups=[asg.asg.name],
+    autoscaling_groups=[app_server.asg.name],
     deployment_config_name="CodeDeployDefault.AllAtOnce",  # * For testing only
     auto_rollback_configuration={
         "enabled": True,

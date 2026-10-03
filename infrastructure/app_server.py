@@ -1,12 +1,14 @@
 import base64
 from pathlib import Path
 
+import app_lb
+import common
+import deployment_artifact
+import network
 import pulumi_aws as aws
-import pulumi_tls as tls
+from components.iam import Role
 from pulumi import Output, ResourceOptions
 from pulumi_extra import render_template
-
-from . import alb, codedeploy, components, metadata, vpc
 
 # * AMI built from image builder is not available at the provisioning time
 # * so we need to trigger a new build to get the latest AMI and distribute it
@@ -15,34 +17,16 @@ ami = aws.ec2.get_ami(
     owners=["amazon"],
     filters=[{"name": "name", "values": ["Windows_Server-2022-English-Full-Base-*"]}],
 )
-ssh_key = tls.PrivateKey(
-    "windows-fleet",
-    algorithm="RSA",  # Windows Server does not support ECDSA yet
-    rsa_bits=3_072,
-)
-key_pair = aws.ec2.KeyPair(
-    "windows-fleet",
-    key_name=f"{metadata.full_name}-windows-fleet",
-    public_key=ssh_key.public_key_openssh,
-)
 security_group = aws.ec2.SecurityGroup(
     "windows-fleet",
-    name=f"{metadata.full_name}-windows-fleet",
-    vpc_id=vpc.vpc.vpc_id,
+    name=f"{common.full_name}-windows-fleet",
+    vpc_id=network.vpc.vpc_id,
     ingress=[
         {
             "protocol": "tcp",
             "from_port": 8000,
             "to_port": 8000,
-            "security_groups": [alb.security_group.id],
-        },
-        {
-            # ! Allow RDP access from anywhere, for testing purposes only
-            # ! In production, update it to accept traffic only from trusted IPs
-            "protocol": "tcp",
-            "from_port": 3389,
-            "to_port": 3389,
-            "cidr_blocks": ["0.0.0.0/0"],
+            "security_groups": [app_lb.sg.id],
         },
     ],
     egress=[
@@ -51,9 +35,9 @@ security_group = aws.ec2.SecurityGroup(
     ],
 )
 instance_role = (
-    components.Role(
+    Role(
         "windows-fleet",
-        name=f"{metadata.full_name}-windows-fleet",
+        name=f"{common.full_name}-windows-fleet",
     )
     .with_policies(
         arns=[
@@ -69,8 +53,10 @@ instance_role = (
                         "effect": "Allow",
                         "actions": ["s3:Get*", "s3:List*"],
                         "resources": [
-                            codedeploy.build_artifacts.arn,
-                            Output.concat(codedeploy.build_artifacts.arn, "/*"),
+                            deployment_artifact.build_artifacts.arn,
+                            Output.concat(
+                                deployment_artifact.build_artifacts.arn, "/*"
+                            ),
                         ],
                     },
                 ],
@@ -81,7 +67,7 @@ instance_role = (
 )
 instance_profile = aws.iam.InstanceProfile(
     "windows-fleet",
-    name=f"{metadata.full_name}-windows-fleet",
+    name=f"{common.full_name}-windows-fleet",
     role=instance_role.name,
 )
 launch_template = aws.ec2.LaunchTemplate(
@@ -93,7 +79,7 @@ launch_template = aws.ec2.LaunchTemplate(
             "image_id",
         ],
     ),
-    name=f"{metadata.full_name}-windows-fleet",
+    name=f"{common.full_name}-windows-fleet",
     update_default_version=True,
     image_id=ami.id,
     instance_requirements={
@@ -103,7 +89,6 @@ launch_template = aws.ec2.LaunchTemplate(
         "burstable_performance": "included",
         "spot_max_price_percentage_over_lowest_price": 100,
     },
-    key_name=key_pair.key_name,
     iam_instance_profile={"arn": instance_profile.arn},
     user_data=render_template(  # ty: ignore[missing-argument]
         Path(__file__).parent / "Bootstrap.userdata.jinja",
@@ -117,13 +102,13 @@ asg = aws.autoscaling.Group(
     opts=ResourceOptions(
         ignore_changes=["desired_capacity", "min_size", "max_size"],
     ),
-    name=f"{metadata.full_name}-windows-fleet",
-    vpc_zone_identifiers=vpc.vpc.private_subnet_ids,
+    name=f"{common.full_name}-windows-fleet",
+    vpc_zone_identifiers=network.vpc.private_subnet_ids,
     desired_capacity=1,
     min_size=1,
     max_size=3,
     health_check_type="EC2",
-    target_group_arns=[alb.target_group.arn],
+    target_group_arns=[app_lb.target_group.arn],
     mixed_instances_policy={
         "launch_template": {
             "launch_template_specification": {
@@ -154,7 +139,7 @@ asg = aws.autoscaling.Group(
     tags=[
         {
             "key": "Name",
-            "value": f"{metadata.full_name}-windows-fleet",
+            "value": f"{common.full_name}-windows-fleet",
             "propagate_at_launch": True,
         },
     ],

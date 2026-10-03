@@ -8,4 +8,4 @@ config:
   aws:region: ap-northeast-2
 
   # GitHub resource provisioning
-  # aws-codedeploy-windows:github-repository-fullname: lasuillard/aws-codedeploy-windows
+  aws-codedeploy-windows:github-repository-fullname: lasuillard/aws-codedeploy-windows
