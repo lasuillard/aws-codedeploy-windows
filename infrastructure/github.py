@@ -69,12 +69,8 @@ def _create_resources(repository_fullname: str) -> None:
                         aws.iam.GetPolicyDocumentStatementArgsDict(
                             sid="CreateDeployment",
                             effect="Allow",
-                            actions=["s3:PutObject", "s3:AbortMultipartUpload"],
-                            resources=[
-                                Output.concat(
-                                    deployment_artifact.build_artifacts.arn, "/*"
-                                )
-                            ],  # ty: ignore[invalid-argument-type]
+                            actions=["codedeploy:CreateDeployment"],
+                            resources=[deployment.deployment_group.arn],  # ty: ignore[invalid-argument-type]
                         ),
                         aws.iam.GetPolicyDocumentStatementArgsDict(
                             sid="Revisions",
