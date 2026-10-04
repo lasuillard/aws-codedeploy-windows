@@ -77,6 +77,7 @@ $ cd infrastructure
 # Initialize Pulumi project and dev stack, **locally**
 $ pulumi login --local
 $ pulumi stack init dev
+$ pulumi config set github-repository-fullname <your-github-username>/<your-repository-name>
 
 # Provision infrastructure
 $ pulumi up
