@@ -20,8 +20,8 @@ This project demonstrates building and deploying a Python application to AWS Win
 - `assets/`: Assets used in the project. Primarily virtual keyboard images.
 - `deploy/aws-codedeploy/`: Deployment scripts and configurations for AWS CodeDeploy.
 - `infrastructure/`: Infrastructure as Code (IaC) for provisioning AWS resources. Uses Pulumi.
-  - `components`: Reusable Pulumi components to reduce code duplication and simplify infrastructure management.
-  - `dynamic`: Pulumi dynamic providers for custom resource management.
+  - `components/`: Reusable Pulumi components to reduce code duplication and simplify infrastructure management.
+  - `dynamic/`: Pulumi dynamic providers for custom resource management.
   - `imagebuilder-components/`: EC2 Image Builder components for building custom AMI images.
 - `lab/windows-server/`: Local lab environment for Windows Server. Uses Vagrant and libvirt.
 - `scripts/`: Utility scripts for various tasks such as deployment and initialization of the application.
@@ -77,13 +77,15 @@ $ cd infrastructure
 # Initialize Pulumi project and dev stack, **locally**
 $ pulumi login --local
 $ pulumi stack init dev
+
+# If deploying the application via GitHub Actions (optional)
 $ pulumi config set github-repository-fullname <your-github-username>/<your-repository-name>
 
 # Provision infrastructure
 $ pulumi up
 ```
 
-Once the Pulumi commands have been successfully executed, the infrastructure will be provisioned. Initial AMI build will be triggered as part of the infrastructure provisioning process. In addition, the necessary GitHub repository configuration including environment and repository variables and secrets will be set up.
+Once the Pulumi commands have been successfully executed, initial AMI build will be triggered as part of the infrastructure provisioning process. In addition, the necessary GitHub repository configuration including environment and repository variables and secrets will be set up.
 
 Wait for AMI build to complete before proceeding with application deployment. Then, trigger the deployment workflow from GitHub Actions:
 
@@ -92,7 +94,7 @@ Wait for AMI build to complete before proceeding with application deployment. Th
 
 ![Trigger deployment workflow in GitHub Actions](./docs/trigger-deployment-gha.png)
 
-Once deployed, you can access the application in a browser using the ALB (Application Load Balancer) public DNS name (e.g. `http://aws-codedeploy-windows-dev-buqpf-710038041.ap-northeast-2.elb.amazonaws.com/docs`).
+Once deployed, you can access the application in a browser using the ALB (Application Load Balancer) public DNS name (e.g. `http://aws-codedeploy-windows-dev-buqpf-710038041.ap-northeast-2.elb.amazonaws.com/docs`):
 
 ![API documentation page](./docs/api-docs-page.png)
 
@@ -105,4 +107,4 @@ $ pulumi destroy
 $ pulumi stack rm dev
 ```
 
-However, resources such as Image Builder images, AMIs, and EBS Snapshots are created externally. We use a [Dynamic Provider](https://www.pulumi.com/docs/iac/concepts/providers/dynamic-providers/) to delete them automatically. However, there might be cases where manual cleanup is still required. So it is recommended to check if any of these resources still exist and delete them manually if necessary.
+However, resources such as **Image Builder Images**, **AMIs**, and **EBS Snapshots** are created externally. We use a [Dynamic Provider](https://www.pulumi.com/docs/iac/concepts/providers/dynamic-providers/) to delete them automatically. However, there might be cases where manual cleanup is still required. So it is recommended to check if any of these resources still exist and delete them manually if necessary.
