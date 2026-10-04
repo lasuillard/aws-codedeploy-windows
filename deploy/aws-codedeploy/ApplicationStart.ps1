@@ -21,7 +21,7 @@ $uvPath = (Get-Command uv -ErrorAction Stop).Source
 $appArgs = @(
   "run",
   "--frozen",
-  "--no-default-group",
+  "--no-default-groups",
   "fastapi",
   "run",
   "--host", "0.0.0.0"

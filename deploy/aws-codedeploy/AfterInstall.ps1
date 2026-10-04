@@ -18,7 +18,7 @@ Set-Location "C:\\app"
 
 # Install Python and dependencies
 uv python install
-uv sync --frozen --no-default-group
+uv sync --frozen --no-default-groups
 
 # Pre-download the webdriver
-uv run --frozen --no-default-group python .\scripts\pre-download-webdriver.py
+uv run --frozen --no-default-groups python .\scripts\pre-download-webdriver.py
