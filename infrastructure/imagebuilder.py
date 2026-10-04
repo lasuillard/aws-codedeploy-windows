@@ -56,8 +56,8 @@ default_infra_config = aws.imagebuilder.InfrastructureConfiguration(
 
 # Image Build Pipeline for Windows Server 2022 with CodeDeploy
 # ----------------------------------------------------------------------------
-# * AutoLogon configuration gets removed by the Image Builder service (SysPrep),
-# * so each instance should do on their own user data script to enable it
+# NOTE: AutoLogon configuration gets removed by the Image Builder service (SysPrep),
+#       so each instance should do on their own user data script to enable it
 image_name = f"{common.full_name}-imagebuilder"
 image_recipe = aws.imagebuilder.ImageRecipe(
     "windows-fleet",
@@ -152,8 +152,8 @@ dynamic.CleanupImagePipeline(
 # Output Resource Lifecycle
 # ----------------------------------------------------------------------------
 # Set up short-lived lifecycle policy to prevent being charged for unused AMIs
-# * This lifecycle may not be helpful for deleting AMIs not managed by this IaC,
-# * because the resources will be deleted on stack destroy, including this policy.
+# NOTE: This lifecycle may not be helpful for deleting AMIs not managed by this IaC,
+#       because the resources will be deleted on stack destroy, including this policy.
 lifecycle_policy_role = (
     Role(
         "imagebuilder-lifecycle-role",

@@ -24,7 +24,7 @@ deployment_group = aws.codedeploy.DeploymentGroup(
     deployment_group_name=f"{common.full_name}-windows-fleet",
     service_role_arn=role.arn,
     autoscaling_groups=[app_server.asg.name],
-    deployment_config_name="CodeDeployDefault.AllAtOnce",  # * For testing only
+    deployment_config_name="CodeDeployDefault.AllAtOnce",  # NOTE: For testing only; not recommended for production
     auto_rollback_configuration={
         "enabled": True,
         "events": ["DEPLOYMENT_FAILURE"],

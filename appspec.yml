@@ -1,4 +1,4 @@
-# ! CodeDeploy `appspec.yml` file does not allow `.yaml` suffix
+# NOTE: CodeDeploy `appspec.yml` file does not allow `.yaml` suffix
 version: 0.0
 os: windows
 files:

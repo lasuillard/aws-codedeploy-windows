@@ -50,8 +50,8 @@ class _Provider(ResourceProvider):
             log.info(f"Deleting snapshot: {snapshot_id}")
             ec2.delete_snapshot(SnapshotId=snapshot_id)
 
-        # * Delete images at last for cases of partial failures; if image is deleted,
-        # * we can't find AMIs and snapshots to delete
+        # Delete images at last for cases of partial failures; if image is deleted,
+        # we can't find AMIs and snapshots to delete
         for image_arn in image_arns:
             log.info(f"Deleting image builder image: {image_arn}")
             image_build_versions = imagebuilder.list_image_build_versions(

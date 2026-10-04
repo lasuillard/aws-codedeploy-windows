@@ -35,7 +35,7 @@ load_balancer = aws.lb.LoadBalancer(
     idle_timeout=300,  # Scraping can take a while for complex sites
 )
 
-# * Not using HTTPS here to make this simple
+# NOTE: Not using HTTPS here to make this simple
 listener_80 = aws.lb.Listener(
     "app-80",
     load_balancer_arn=load_balancer.arn,

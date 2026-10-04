@@ -11,8 +11,8 @@ import deployment_artifact
 import network
 from components.iam import Role
 
-# * AMI built from image builder is not available at the provisioning time
-# * so we need to trigger a new build to get the latest AMI and distribute it
+# NOTE: AMI built from image builder is not available at the provisioning time,
+#       so we need to trigger a new build to get the latest AMI and distribute it
 ami = aws.ec2.get_ami(
     most_recent=True,
     owners=["amazon"],
