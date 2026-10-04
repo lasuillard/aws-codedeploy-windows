@@ -47,21 +47,23 @@ instance_role = (
             aws.iam.ManagedPolicy.CLOUD_WATCH_AGENT_SERVER_POLICY,
         ],
         documents=[
-            {
-                "statements": [
-                    {
-                        "sid": "GetBuildArtifactsForCodeDeploy",
-                        "effect": "Allow",
-                        "actions": ["s3:Get*", "s3:List*"],
-                        "resources": [
+            aws.iam.get_policy_document(
+                statements=[
+                    aws.iam.GetPolicyDocumentStatementArgsDict(
+                        sid="GetBuildArtifactsForCodeDeploy",
+                        effect="Allow",
+                        actions=["s3:Get*", "s3:List*"],
+                        resources=[
                             deployment_artifact.build_artifacts.arn,
-                            Output.concat(
-                                deployment_artifact.build_artifacts.arn, "/*"
+                            Output.format(
+                                "{}/{}",
+                                deployment_artifact.build_artifacts.arn,
+                                "*",
                             ),
-                        ],
-                    },
+                        ],  # ty: ignore[invalid-argument-type]
+                    )
                 ],
-            },
+            ),
         ],
     )
     .build()

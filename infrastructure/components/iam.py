@@ -139,7 +139,7 @@ class Role(Component):
         self,
         *,
         arns: Sequence[Input[str]] = (),
-        documents: Sequence[dict | aws.iam.AwaitableGetPolicyDocumentResult] = (),
+        documents: Sequence[aws.iam.AwaitableGetPolicyDocumentResult] = (),
         exclusive: bool = True,
     ) -> Self:
         """Specify policies to attach to the role.
@@ -151,12 +151,7 @@ class Role(Component):
 
         """
         self._policy_arns = arns
-        self._policy_documents = [
-            aws.iam.get_policy_document(**document)
-            if isinstance(document, dict)
-            else document
-            for document in documents
-        ]
+        self._policy_documents = documents
         self._policy_attachment_exclusive = exclusive
         return self
 
