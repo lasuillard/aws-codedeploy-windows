@@ -4,7 +4,7 @@ $ErrorActionPreference = 'Continue'
 $serviceName = 'MainApplication'
 
 # Stop existing service if it is running
-$service = Get-Service -Name "$serviceName" -ErrorAction SilentlyContinue
+$service = Get-Service -Name $serviceName -ErrorAction SilentlyContinue
 if (-Not $service) {
   Write-Output "Service ${serviceName} does not exist."
   return
@@ -29,7 +29,7 @@ if ($service.Status -eq 'Running') {
     $elapsedTime += $checkIntervalSec
   }
 
-  $remainingProcesses = Get-Process -Name 'python' -ErrorAction SilentlyContinue | Where-Path { $_.Path -like 'C:\app\*' }
+  $remainingProcesses = Get-Process -Name 'python' -ErrorAction SilentlyContinue | Where-Object { $_.Path -like 'C:\app\*' }
   if ($remainingProcesses) {
     Write-Output "Exceeded maximum retries for stopping service ${serviceName}. Terminating remaining python processes."
     $remainingProcesses | Stop-Process -Force

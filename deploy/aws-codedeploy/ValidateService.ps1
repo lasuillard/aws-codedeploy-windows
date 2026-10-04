@@ -11,7 +11,7 @@ Write-Host "Starting health check for ${uri}; will retry up to ${maxRetries} tim
 while ($retryCount -lt $maxRetries) {
     Write-Host "Attempting health check... ($($retryCount + 1) / ${maxRetries})"
     try {
-        $response = Invoke-WebRequest -Uri "$uri" -UseBasicParsing -TimeoutSec 5
+        $response = Invoke-WebRequest -Uri $uri -UseBasicParsing -TimeoutSec 5
         if ($response.StatusCode -eq 200) {
             Write-Host "Health check passed."
             exit 0
