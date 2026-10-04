@@ -115,7 +115,7 @@ distro_config = aws.imagebuilder.DistributionConfiguration(
             "launch_template_configurations": [
                 {
                     "account_id": account_id,
-                    "launch_template_id": app_server.asg.launch_template.id,
+                    "launch_template_id": app_server.launch_template.id,
                     "default": True,
                 },
             ],
