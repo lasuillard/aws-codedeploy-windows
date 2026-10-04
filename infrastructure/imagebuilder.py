@@ -123,18 +123,32 @@ distro_config = aws.imagebuilder.DistributionConfiguration(
     ],
 )
 
+execution_role = (
+    Role(
+        "imagebuilder-execution-role",
+        name=f"{common.full_name}-imagebuilder-execution-role",
+    )
+    .assumable(services=["imagebuilder.amazonaws.com"])
+    .with_policies(
+        arns=[
+            # BUG: aws.iam.ManagedPolicy does not have EC2ImageBuilderExecutionPolicy, so we use the ARN directly.
+            "arn:aws:iam::aws:policy/EC2ImageBuilderExecutionPolicy",
+        ],
+    )
+    .build()
+)
 image_pipeline = aws.imagebuilder.ImagePipeline(
     "windows-fleet",
     name=f"{common.full_name}-imagebuilder",
     description="Image build pipeline for Windows Server 2022 with CodeDeploy.",
     image_recipe_arn=image_recipe.arn,
-    execution_role=aws.iam.get_role("AWSServiceRoleForImageBuilder").arn,
+    execution_role=execution_role.arn,
     infrastructure_configuration_arn=default_infra_config.arn,
     distribution_configuration_arn=distro_config.arn,
     workflows=[
-        aws.imagebuilder.ImagePipelineWorkflowArgsDict(
-            workflow_arn=f"arn:{partition}:imagebuilder:{region}:aws:workflow/build/build-image/x.x.x",
-        ),
+        {
+            "workflow_arn": f"arn:{partition}:imagebuilder:{region}:aws:workflow/build/build-image/x.x.x",
+        },
         # NOTE: Skipping the test workflow for now, but recommended for production
     ],
 )
