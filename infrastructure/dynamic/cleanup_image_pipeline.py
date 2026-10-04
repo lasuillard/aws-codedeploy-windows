@@ -9,8 +9,8 @@ class _Provider(ResourceProvider):
     def create(self, props: Any) -> CreateResult:
         return CreateResult(id_=props["image_pipeline_name"], outs=props)
 
-    def delete(self, _id: str, props: Any) -> None:
-        session = boto3.Session(region_name=props.get("region", None))
+    def delete(self, _id: str, _props: dict[str, Any]) -> None:
+        session = boto3.Session(region_name=_props.get("region", None))
         ec2, imagebuilder = session.client("ec2"), session.client("imagebuilder")
 
         # Lookup Image Builder images to find AMIs and snapshots to delete
@@ -50,8 +50,8 @@ class _Provider(ResourceProvider):
             log.info(f"Deleting snapshot: {snapshot_id}")
             ec2.delete_snapshot(SnapshotId=snapshot_id)
 
-        # * Delete images at last for cases of partial failures; if image is deleted,
-        # * we can't find AMIs and snapshots to delete
+        # Delete images at last for cases of partial failures; if image is deleted,
+        # we can't find AMIs and snapshots to delete
         for image_arn in image_arns:
             log.info(f"Deleting image builder image: {image_arn}")
             image_build_versions = imagebuilder.list_image_build_versions(

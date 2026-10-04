@@ -2,12 +2,13 @@ import pulumi_aws as aws
 import pulumi_random as random
 from pulumi import Output
 
-from . import metadata, vpc
+import common
+import network
 
-security_group = aws.ec2.SecurityGroup(
+sg = aws.ec2.SecurityGroup(
     "app",
-    name=f"{metadata.full_name}",
-    vpc_id=vpc.vpc.vpc_id,
+    name=f"{common.full_name}",
+    vpc_id=network.vpc.vpc_id,
     ingress=[
         # Allow all inbound traffic
         {"protocol": "-1", "from_port": 0, "to_port": 0, "cidr_blocks": ["0.0.0.0/0"]},
@@ -19,22 +20,22 @@ security_group = aws.ec2.SecurityGroup(
 )
 suffix = random.RandomString(
     "alb-suffix",
-    length=min(max(32 - 1 - len(metadata.full_name), 4), 8),  # 4 ~ 8 characters
+    length=min(max(32 - 1 - len(common.full_name), 4), 8),  # 4 ~ 8 characters
     special=False,
     upper=False,
 )
-lb_name = Output.concat(f"{metadata.full_name}-", suffix.result)
+lb_name = Output.concat(f"{common.full_name}-", suffix.result)
 load_balancer = aws.lb.LoadBalancer(
     "app",
     name=lb_name,
     load_balancer_type="application",
-    subnets=vpc.vpc.public_subnet_ids,
+    subnets=network.vpc.public_subnet_ids,
     internal=False,
-    security_groups=[security_group.id],
+    security_groups=[sg.id],
     idle_timeout=300,  # Scraping can take a while for complex sites
 )
 
-# * Not using HTTPS here to make this simple
+# NOTE: Not using HTTPS here to make this simple
 listener_80 = aws.lb.Listener(
     "app-80",
     load_balancer_arn=load_balancer.arn,
@@ -54,8 +55,8 @@ listener_80 = aws.lb.Listener(
 
 target_group = aws.lb.TargetGroup(
     "app-8000",
-    name=f"{metadata.full_name}-8000",
-    vpc_id=vpc.vpc.vpc_id,
+    name=f"{common.full_name}-8000",
+    vpc_id=network.vpc.vpc_id,
     protocol="HTTP",
     port=8000,
     health_check={

@@ -1,0 +1,20 @@
+extend = "../pyproject.toml"
+
+[lint.isort]
+known-first-party = [
+  # IaC components (internal libraries and utilities)
+  "components",
+  "dynamic",
+  # IaC modules
+  "app_lb",
+  "app_server",
+  "common",
+  "config",
+  "deployment_artifact",
+  "deployment",
+  "export",
+  "github",
+  "imagebuilder_components",
+  "imagebuilder",
+  "network",
+]

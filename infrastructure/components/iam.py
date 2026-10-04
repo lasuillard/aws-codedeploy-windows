@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from collections.abc import Awaitable, Sequence
-from typing import Any, Self
+from typing import TYPE_CHECKING, Any, Self, cast
 from urllib.parse import urlparse
 
 import pulumi_aws as aws
@@ -62,16 +62,27 @@ class Role(Component):
         actions: Sequence[Input[str]] = ("sts:AssumeRole", "sts:TagSession"),
     ) -> Self:
         """Specify assume role policy for AWS services or roles."""
+
+        # HACK: Coerce types for type checking; bad typing in upstream libraries.
+        if TYPE_CHECKING:
+            role_arns = cast(Sequence[str], role_arns)
+            services = cast(Sequence[str], services)
+            actions = cast(Sequence[str], actions)
+
         self._assume_role_policy = aws.iam.get_policy_document(
             statements=[
-                {
-                    "effect": "Allow",
-                    "principals": [
-                        {"type": "AWS", "identifiers": role_arns},
-                        {"type": "Service", "identifiers": services},
+                aws.iam.GetPolicyDocumentStatementArgsDict(
+                    effect="Allow",
+                    principals=[
+                        aws.iam.GetPolicyDocumentStatementPrincipalArgsDict(
+                            type="AWS", identifiers=role_arns
+                        ),
+                        aws.iam.GetPolicyDocumentStatementPrincipalArgsDict(
+                            type="Service", identifiers=services
+                        ),
                     ],
-                    "actions": actions,
-                },
+                    actions=actions,
+                ),
             ],
         )
         return self
@@ -83,6 +94,12 @@ class Role(Component):
         oidc_subjects_with_wildcards: Sequence[Input[str]],
     ) -> Self:
         """Specify assume role policy for OIDC provider."""
+        # HACK: Coerce types for type checking; bad typing in upstream libraries.
+        if TYPE_CHECKING:
+            oidc_subjects_with_wildcards = cast(
+                Sequence[str], oidc_subjects_with_wildcards
+            )
+
         if (url := urlparse(provider_domain_or_url)) and url.hostname:
             provider_domain = str(url.hostname)
         else:
@@ -90,9 +107,9 @@ class Role(Component):
 
         self._assume_role_policy = aws.iam.get_policy_document(
             statements=[
-                {
-                    "effect": "Allow",
-                    "principals": [
+                aws.iam.GetPolicyDocumentStatementArgsDict(
+                    effect="Allow",
+                    principals=[
                         {
                             "type": "Federated",
                             "identifiers": [
@@ -100,20 +117,20 @@ class Role(Component):
                             ],
                         },
                     ],
-                    "conditions": [
-                        {
-                            "test": "StringEquals",
-                            "variable": f"{provider_domain}:aud",
-                            "values": ["sts.amazonaws.com"],
-                        },
-                        {
-                            "test": "StringLike",
-                            "variable": f"{provider_domain}:sub",
-                            "values": oidc_subjects_with_wildcards,
-                        },
+                    conditions=[
+                        aws.iam.GetPolicyDocumentStatementConditionArgsDict(
+                            test="StringEquals",
+                            variable=f"{provider_domain}:aud",
+                            values=["sts.amazonaws.com"],
+                        ),
+                        aws.iam.GetPolicyDocumentStatementConditionArgsDict(
+                            test="StringLike",
+                            variable=f"{provider_domain}:sub",
+                            values=oidc_subjects_with_wildcards,
+                        ),
                     ],
-                    "actions": ["sts:AssumeRoleWithWebIdentity"],
-                },
+                    actions=["sts:AssumeRoleWithWebIdentity"],
+                ),
             ],
         )
         return self
@@ -122,7 +139,7 @@ class Role(Component):
         self,
         *,
         arns: Sequence[Input[str]] = (),
-        documents: Sequence[dict | aws.iam.AwaitableGetPolicyDocumentResult] = (),
+        documents: Sequence[aws.iam.AwaitableGetPolicyDocumentResult] = (),
         exclusive: bool = True,
     ) -> Self:
         """Specify policies to attach to the role.
@@ -134,12 +151,7 @@ class Role(Component):
 
         """
         self._policy_arns = arns
-        self._policy_documents = [
-            aws.iam.get_policy_document(**document)
-            if isinstance(document, dict)
-            else document
-            for document in documents
-        ]
+        self._policy_documents = documents
         self._policy_attachment_exclusive = exclusive
         return self
 

@@ -1,6 +1,7 @@
+from pathlib import Path
+
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
-from pathlib import Path
 
 logs_dir = Path("./logs")
 logs_dir.mkdir(parents=True, exist_ok=True)
@@ -20,7 +21,7 @@ def pre_download_webdriver() -> None:
     options.add_argument("--force-device-scale-factor=1")
 
     print("Running webdriver...")
-    service = Service(log_output=str(logs_dir / "pre_download_webdriver.log"))
+    service = Service(log_output=str(logs_dir / "pre-download-webdriver.log"))
     wd = None
     try:
         wd = webdriver.Chrome(options=options, service=service)
@@ -35,7 +36,7 @@ def pre_download_webdriver() -> None:
         )
         wd.get("data:,webdriver-ready")
         wd.get_screenshot_as_file(
-            str(dump_dir / "pre_download_webdriver_screenshot.png")
+            str(dump_dir / "pre-download-webdriver-screenshot.png")
         )
     finally:
         if wd is not None:

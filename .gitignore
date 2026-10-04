@@ -1,7 +1,7 @@
 .devcontainer
 .vscode
 dump
-infra/Pulumi.*.yaml
+infrastructure/Pulumi.*.yaml
 logs
 
 # Created by https://www.toptal.com/developers/gitignore/api/git,linux,macos,direnv,dotenv,python,windows,visualstudiocode,vagrant

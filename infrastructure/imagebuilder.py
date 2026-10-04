@@ -1,20 +1,23 @@
-from pathlib import Path
-
 import pulumi_aws as aws
 
-from . import asg, components, dynamic, metadata, vpc
+import app_server
+import common
+import dynamic
+import imagebuilder_components
+import network
+from components.iam import Role
 
 partition = aws.get_partition().partition
-region = aws.get_region().name
+region = aws.get_region().region
 account_id = aws.get_caller_identity().account_id
 
 # EC2 Image Builder Infrastructure
 # ----------------------------------------------------------------------------
 security_group = aws.ec2.SecurityGroup(
     "imagebuilder",
-    name=f"{metadata.full_name}-imagebuilder",
+    name=f"{common.full_name}-imagebuilder",
     description="Security group for instances managed by EC2 Image Builder.",
-    vpc_id=vpc.vpc.vpc_id,
+    vpc_id=network.vpc.vpc_id,
     ingress=[],
     egress=[
         # Allow all outbound traffic
@@ -22,9 +25,9 @@ security_group = aws.ec2.SecurityGroup(
     ],
 )
 instance_role = (
-    components.Role(
+    Role(
         "imagebuilder-instance-role",
-        name=f"{metadata.full_name}-imagebuilder-instance-role",
+        name=f"{common.full_name}-imagebuilder-instance-role",
     )
     .assumable(services=["ec2.amazonaws.com"])
     .with_policies(
@@ -38,33 +41,24 @@ instance_role = (
 )
 instance_profile = aws.iam.InstanceProfile(
     "imagebuilder",
-    name=f"{metadata.full_name}-imagebuilder",
+    name=f"{common.full_name}-imagebuilder",
     role=instance_role.name,
 )
 default_infra_config = aws.imagebuilder.InfrastructureConfiguration(
     "default",
-    name=f"{metadata.full_name}-imagebuilder",
+    name=f"{common.full_name}-imagebuilder",
     description="Default image builder infrastructure configuration.",
     instance_profile_name=instance_profile.name,
     instance_types=["t3a.large", "t3.large", "t3a.medium", "t3.medium"],
-    subnet_id=vpc.vpc.private_subnet_ids[0],
+    subnet_id=network.vpc.private_subnet_ids[0],
     security_group_ids=[security_group.id],
 )
 
 # Image Build Pipeline for Windows Server 2022 with CodeDeploy
 # ----------------------------------------------------------------------------
-# * AutoLogon configuration gets removed by the Image Builder service (SysPrep),
-# * so each instance should do on their own user data script to enable it
-install_kftcvan_security_program = aws.imagebuilder.Component(
-    "install-kftcvan-security-program",
-    name="Install-KFTCVAN-Security-Program",
-    version="1.0.0",
-    platform="Windows",
-    supported_os_versions=["Microsoft Windows Server 2022"],
-    data=(Path(__file__).parent / "install-kftcvan-security-program.yaml").read_text(),
-    skip_destroy=False,
-)
-image_name = f"{metadata.full_name}-imagebuilder"
+# NOTE: AutoLogon configuration gets removed by the Image Builder service (SysPrep),
+#       so each instance should do on their own user data script to enable it
+image_name = f"{common.full_name}-imagebuilder"
 image_recipe = aws.imagebuilder.ImageRecipe(
     "windows-fleet",
     name=image_name,
@@ -94,7 +88,7 @@ image_recipe = aws.imagebuilder.ImageRecipe(
             "parameters": [],
         },
         {
-            "component_arn": install_kftcvan_security_program.arn,
+            "component_arn": imagebuilder_components.install_kftcvan_security_program.arn,
             "parameters": [],
         },
     ],
@@ -109,19 +103,19 @@ log_group = aws.cloudwatch.LogGroup(
 )
 distro_config = aws.imagebuilder.DistributionConfiguration(
     "windows-fleet",
-    name=f"{metadata.full_name}-imagebuilder",
+    name=f"{common.full_name}-imagebuilder",
     description="Distribution configuration for Windows Server 2022 with CodeDeploy.",
     distributions=[
         {
             "region": region,
             "ami_distribution_configuration": {
                 # BUG: AMI name format shown in console like: "aws-codedeploy-windows-{{" (but works OK)
-                "name": metadata.full_name + "-{{ imagebuilder:buildDate }}",
+                "name": common.full_name + "-{{ imagebuilder:buildDate }}",
             },
             "launch_template_configurations": [
                 {
                     "account_id": account_id,
-                    "launch_template_id": asg.launch_template.id,
+                    "launch_template_id": app_server.asg.launch_template.id,
                     "default": True,
                 },
             ],
@@ -131,17 +125,17 @@ distro_config = aws.imagebuilder.DistributionConfiguration(
 
 image_pipeline = aws.imagebuilder.ImagePipeline(
     "windows-fleet",
-    name=f"{metadata.full_name}-imagebuilder",
+    name=f"{common.full_name}-imagebuilder",
     description="Image build pipeline for Windows Server 2022 with CodeDeploy.",
     image_recipe_arn=image_recipe.arn,
     execution_role=aws.iam.get_role("AWSServiceRoleForImageBuilder").arn,
     infrastructure_configuration_arn=default_infra_config.arn,
     distribution_configuration_arn=distro_config.arn,
     workflows=[
-        {
-            "workflowArn": f"arn:{partition}:imagebuilder:{region}:aws:workflow/build/build-image/x.x.x",
-        },
-        # ! Skipping the test workflow for now, but recommended for production
+        aws.imagebuilder.ImagePipelineWorkflowArgsDict(
+            workflow_arn=f"arn:{partition}:imagebuilder:{region}:aws:workflow/build/build-image/x.x.x",
+        ),
+        # NOTE: Skipping the test workflow for now, but recommended for production
     ],
 )
 dynamic.TriggerImagePipeline(
@@ -158,12 +152,12 @@ dynamic.CleanupImagePipeline(
 # Output Resource Lifecycle
 # ----------------------------------------------------------------------------
 # Set up short-lived lifecycle policy to prevent being charged for unused AMIs
-# * This lifecycle may not be helpful for deleting AMIs not managed by this IaC,
-# * because the resources will be deleted on stack destroy, including this policy.
+# NOTE: This lifecycle may not be helpful for deleting AMIs not managed by this IaC,
+#       because the resources will be deleted on stack destroy, including this policy.
 lifecycle_policy_role = (
-    components.Role(
+    Role(
         "imagebuilder-lifecycle-role",
-        name=f"{metadata.full_name}-imagebuilder-lifecycle-role",
+        name=f"{common.full_name}-imagebuilder-lifecycle-role",
     )
     .assumable(services=["imagebuilder.amazonaws.com"])
     .with_policies(
@@ -175,7 +169,7 @@ lifecycle_policy_role = (
 )
 aws.imagebuilder.LifecyclePolicy(
     "imagebuilder-lifecycle",
-    name=f"{metadata.full_name}-imagebuilder",
+    name=f"{common.full_name}-imagebuilder",
     execution_role=lifecycle_policy_role.arn,
     resource_type="AMI_IMAGE",
     policy_details=[

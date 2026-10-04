@@ -1,11 +1,11 @@
 import pulumi_awsx as awsx
 
-from . import metadata
+import common
 
 vpc = awsx.ec2.Vpc(
-    metadata.full_name,
+    common.full_name,
     cidr_block="172.31.0.0/16",
-    number_of_availability_zones=3,
+    number_of_availability_zones=1,  # Simplified for this experiment project
     enable_dns_hostnames=True,
     enable_dns_support=True,
     subnet_strategy=awsx.ec2.SubnetAllocationStrategy.AUTO,

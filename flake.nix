@@ -54,6 +54,9 @@
             # Use installed browser and webdriver for Selenium
             export SE_CHROME_PATH="${pkgs.chromium}/bin/chromium"
             export SE_CHROMEDRIVER="${pkgs.chromedriver}/bin/chromedriver"
+
+            # Pulumi IaC
+            export PULUMI_IGNORE_AMBIENT_PLUGINS=true
           '';
         };
       }
