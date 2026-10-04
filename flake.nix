@@ -30,6 +30,7 @@
             graphviz
             pulumi-bin
             awscli2
+            ssm-session-manager-plugin
             pulumiPackages.pulumi-python
             chromium
             chromedriver
