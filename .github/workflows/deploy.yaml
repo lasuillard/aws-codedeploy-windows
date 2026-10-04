@@ -1,7 +1,11 @@
-name: Deploy to AWS CodeDeploy
+name: Deploy
 
 on:
-  # NOTE: Trigger on push to main branch has been omitted, as this project is an example
+  # NOTE: Trigger on push to main branch is disabled because this project is an example
+  # push:
+  #   branches:
+  #     - main
+
   workflow_dispatch:
 
 concurrency:
@@ -9,8 +13,8 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy-to-codedeploy:
-    name: Deploy to CodeDeploy
+  deploy:
+    name: Deploy
     runs-on: ubuntu-latest
     timeout-minutes: 20
     environment: codedeploy
@@ -18,7 +22,8 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout
+        uses: actions/checkout@v6
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v5
