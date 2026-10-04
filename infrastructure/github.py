@@ -44,7 +44,50 @@ def _create_resources(repository_fullname: str) -> None:
             ],
         )
         .with_policies(
-            arns=[aws.iam.ManagedPolicy.ADMINISTRATOR_ACCESS],
+            documents=[
+                aws.iam.get_policy_document(
+                    statements=[
+                        aws.iam.GetPolicyDocumentStatementArgsDict(
+                            sid="UploadBundle",
+                            effect="Allow",
+                            actions=["s3:PutObject", "s3:AbortMultipartUpload"],
+                            resources=[
+                                Output.concat(
+                                    deployment_artifact.build_artifacts.arn, "/*"
+                                )
+                            ],  # ty: ignore[invalid-argument-type]
+                        ),
+                        aws.iam.GetPolicyDocumentStatementArgsDict(
+                            sid="ReadDeployments",
+                            effect="Allow",
+                            actions=[
+                                "codedeploy:GetDeployment",
+                                "codedeploy:GetDeploymentConfig",
+                            ],
+                            resources=["*"],
+                        ),
+                        aws.iam.GetPolicyDocumentStatementArgsDict(
+                            sid="CreateDeployment",
+                            effect="Allow",
+                            actions=["s3:PutObject", "s3:AbortMultipartUpload"],
+                            resources=[
+                                Output.concat(
+                                    deployment_artifact.build_artifacts.arn, "/*"
+                                )
+                            ],  # ty: ignore[invalid-argument-type]
+                        ),
+                        aws.iam.GetPolicyDocumentStatementArgsDict(
+                            sid="Revisions",
+                            effect="Allow",
+                            actions=[
+                                "codedeploy:GetApplicationRevision",
+                                "codedeploy:RegisterApplicationRevision",
+                            ],
+                            resources=[deployment.app.arn],  # ty: ignore[invalid-argument-type]
+                        ),
+                    ]
+                ),
+            ]
         )
         .build()
     )
