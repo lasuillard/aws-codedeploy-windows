@@ -1,20 +1,17 @@
 import pulumi_aws as aws
 import pulumi_github as github
 import pulumi_tls as tls
-from pulumi import Config, Output, log
+from pulumi import Output, log
 from pulumi_github.get_repository import AwaitableGetRepositoryResult
 
 import common
+import config
 import deployment
 import deployment_artifact
 from components.iam import Role
 
-config = Config()
 
-repository_fullname = config.get("github-repository-fullname")
-
-
-def main() -> None:
+def _create_resources(repository_fullname: str) -> None:
     repository: AwaitableGetRepositoryResult = github.get_repository(
         full_name=repository_fullname
     )
@@ -22,25 +19,16 @@ def main() -> None:
         url=f"https://{common.gha_oidc_provider_domain}/.well-known/openid-configuration",
     )
 
-    # Create GitHub OIDC provider if not exists
-    try:
-        aws.iam.get_open_id_connect_provider(
-            url=f"https://{common.gha_oidc_provider_domain}"
-        )
-    except Exception as err:
-        if "not found" not in str(err):
-            raise
-
-        _gha_oidc_provider = aws.iam.OpenIdConnectProvider(
-            "github-actions",
-            url=f"https://{common.gha_oidc_provider_domain}",
-            thumbprint_lists=[
-                # https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_create_oidc_verify-thumbprint.html
-                certificate.certificates[0].sha1_fingerprint,
-            ],
-            client_id_lists=["sts.amazonaws.com"],
-        )
-
+    # GitHub Actions OIDC
+    aws.iam.OpenIdConnectProvider(
+        "github-actions",
+        url=f"https://{common.gha_oidc_provider_domain}",
+        thumbprint_lists=[
+            # https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_create_oidc_verify-thumbprint.html
+            certificate.certificates[0].sha1_fingerprint,
+        ],
+        client_id_lists=["sts.amazonaws.com"],
+    )
     gha_oidc_role = (
         Role(
             "github-actions",
@@ -106,7 +94,7 @@ def main() -> None:
         )
 
 
-if repository_fullname:
-    main()
+if config.repository_fullname:
+    _create_resources(config.repository_fullname)
 else:
     log.warn("GitHub repository is not provided, skip provisioning relevant resources.")

@@ -9,8 +9,8 @@ class _Provider(ResourceProvider):
     def create(self, props: Any) -> CreateResult:
         return CreateResult(id_=props["image_pipeline_name"], outs=props)
 
-    def delete(self, _id: str, props: Any) -> None:
-        session = boto3.Session(region_name=props.get("region", None))
+    def delete(self, _id: str, _props: dict[str, Any]) -> None:
+        session = boto3.Session(region_name=_props.get("region", None))
         ec2, imagebuilder = session.client("ec2"), session.client("imagebuilder")
 
         # Lookup Image Builder images to find AMIs and snapshots to delete

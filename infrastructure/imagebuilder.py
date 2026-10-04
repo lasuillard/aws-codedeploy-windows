@@ -132,10 +132,10 @@ image_pipeline = aws.imagebuilder.ImagePipeline(
     infrastructure_configuration_arn=default_infra_config.arn,
     distribution_configuration_arn=distro_config.arn,
     workflows=[
-        {
-            "workflowArn": f"arn:{partition}:imagebuilder:{region}:aws:workflow/build/build-image/x.x.x",
-        },
-        # ! Skipping the test workflow for now, but recommended for production
+        aws.imagebuilder.ImagePipelineWorkflowArgsDict(
+            workflow_arn=f"arn:{partition}:imagebuilder:{region}:aws:workflow/build/build-image/x.x.x",
+        ),
+        # NOTE: Skipping the test workflow for now, but recommended for production
     ],
 )
 dynamic.TriggerImagePipeline(

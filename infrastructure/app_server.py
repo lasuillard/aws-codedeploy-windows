@@ -1,14 +1,15 @@
 import base64
 from pathlib import Path
 
+import pulumi_aws as aws
+from pulumi import Output, ResourceOptions
+from pulumi_extra import render_template
+
 import app_lb
 import common
 import deployment_artifact
 import network
-import pulumi_aws as aws
 from components.iam import Role
-from pulumi import Output, ResourceOptions
-from pulumi_extra import render_template
 
 # * AMI built from image builder is not available at the provisioning time
 # * so we need to trigger a new build to get the latest AMI and distribute it
@@ -93,10 +94,13 @@ launch_template = aws.ec2.LaunchTemplate(
     user_data=render_template(  # ty: ignore[missing-argument]
         Path(__file__).parent / "Bootstrap.userdata.jinja",
         inputs={},
-    ).apply(lambda text: base64.b64encode(text.encode()).decode("utf-8")),
+    ).apply(
+        lambda text: base64.b64encode(text.encode()).decode("utf-8")  # ty: ignore[invalid-argument-type]
+    ),
     vpc_security_group_ids=[security_group.id],
     monitoring={"enabled": True},
 )
+
 asg = aws.autoscaling.Group(
     "windows-fleet",
     opts=ResourceOptions(
@@ -127,14 +131,14 @@ asg = aws.autoscaling.Group(
         "strategy": "Rolling",
     },
     enabled_metrics=[
-        "GroupMinSize",
-        "GroupMaxSize",
-        "GroupDesiredCapacity",
-        "GroupInServiceInstances",
-        "GroupPendingInstances",
-        "GroupStandbyInstances",
-        "GroupTerminatingInstances",
-        "GroupTotalInstances",
+        aws.autoscaling.Metric.GROUP_MIN_SIZE,
+        aws.autoscaling.Metric.GROUP_MAX_SIZE,
+        aws.autoscaling.Metric.GROUP_DESIRED_CAPACITY,
+        aws.autoscaling.Metric.GROUP_IN_SERVICE_INSTANCES,
+        aws.autoscaling.Metric.GROUP_PENDING_INSTANCES,
+        aws.autoscaling.Metric.GROUP_STANDBY_INSTANCES,
+        aws.autoscaling.Metric.GROUP_TERMINATING_INSTANCES,
+        aws.autoscaling.Metric.GROUP_TOTAL_INSTANCES,
     ],
     tags=[
         {

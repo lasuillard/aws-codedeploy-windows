@@ -92,7 +92,7 @@ class BaseKeymap(ABC):
             self.img_dir = img_dir
 
         key_to_filename = self._resolve_key_mapping()
-        self._map_img = self._load_images(key_to_filename)  # ty: ignore[invalid-assignment]
+        self._map_img = self._load_images(key_to_filename)
 
     def _resolve_key_mapping(self) -> dict[str, str]:
         """Resolve mapping from key characters to asset filenames."""
@@ -134,10 +134,15 @@ class BaseKeymap(ABC):
 
     def _load_images(self, key_to_filename: dict[str, str]) -> dict[str, MatLike]:
         """Load key images from asset directory."""
-        map_img = {
-            k: cv2.imread(str(self.img_dir / v)) for k, v in key_to_filename.items()
-        }
-        failed_keys = [k for k, img in map_img.items() if img is None]
+        map_img = {}
+        failed_keys = []
+        for k, v in key_to_filename.items():
+            img = cv2.imread(str(self.img_dir / v))
+            if img is None:
+                failed_keys.append(k)
+            else:
+                map_img[k] = img
+
         if failed_keys:
             load_failed = ", ".join(failed_keys)
             msg = f"{len(failed_keys)} key images failed to load: {load_failed}"
