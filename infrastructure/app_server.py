@@ -2,6 +2,7 @@ import base64
 from pathlib import Path
 
 import pulumi_aws as aws
+import pulumi_tls as tls
 from pulumi import Output, ResourceOptions
 from pulumi_extra import render_template
 
@@ -17,6 +18,16 @@ ami = aws.ec2.get_ami(
     most_recent=True,
     owners=["amazon"],
     filters=[{"name": "name", "values": ["Windows_Server-2022-English-Full-Base-*"]}],
+)
+ssh_key = tls.PrivateKey(
+    "windows-fleet",
+    algorithm="RSA",  # Windows Server does not support ECDSA yet
+    rsa_bits=3_072,
+)
+key_pair = aws.ec2.KeyPair(
+    "windows-fleet",
+    key_name=f"{common.full_name}-windows-fleet",
+    public_key=ssh_key.public_key_openssh,
 )
 security_group = aws.ec2.SecurityGroup(
     "windows-fleet",
@@ -97,6 +108,9 @@ launch_template = aws.ec2.LaunchTemplate(
         "burstable_performance": "included",
         "spot_max_price_percentage_over_lowest_price": 100,
     },
+    # We DO NOT use SSH key for access (22 port is not open). Use Session Manager instead.
+    # SSH key pair is required when accessing via Fleet Manager Remote Desktop to retrieve admin credentials.
+    key_name=key_pair.key_name,
     iam_instance_profile={"arn": instance_profile.arn},
     user_data=render_template(  # ty: ignore[missing-argument]
         Path(__file__).parent / "Bootstrap.userdata.jinja",
