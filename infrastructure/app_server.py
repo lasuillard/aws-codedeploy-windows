@@ -80,6 +80,11 @@ launch_template = aws.ec2.LaunchTemplate(
             # Only provide initial default; managed by EC2 Image Builder
             "description",
             "image_id",
+            # Updated by EC2 Image Builder
+            "default_version",
+            "tags.CreatedBy",  # It works, but Pulumi complains: `cannot ignore changes in added or removed elements of the path: "tagsAll.CreatedBy"`; ignore this warning for now
+            "latestVersion",
+            "tagsAll.CreatedBy",
         ],
     ),
     name=f"{common.full_name}-windows-fleet",
