@@ -26,7 +26,7 @@ This project demonstrates building and deploying a Python application to AWS Win
 - `lab/windows-server/`: Local lab environment for Windows Server. Uses Vagrant and libvirt.
 - `scripts/`: Utility scripts for various tasks such as deployment and initialization of the application.
 - `src/`: Source code for the demo scraping application.
-- `test/`: Test cases for the application. Currently empty.
+- `test/`: Test cases for the application.
 
 ## ⚙️ Technical details
 
@@ -65,7 +65,7 @@ This repository uses [Nix Flakes](https://nix.dev/concepts/flakes.html) to manag
 - `ssm-session-manager-plugin` (`session-manager-plugin`)
 - etc. (see [flake.nix](flake.nix))
 
-Run `nix develop` to activate the environment. This will automatically install the above tools. Alternatively, you can use the included Dev Container configuration which has Nix installed. However, it is recommended to work on the host machine for case a local VM is needed during development, as it provides better performance and access to system resources.
+Run `nix develop` to activate the environment. This will automatically install the above tools. Alternatively, you can use the included Dev Container configuration which has Nix installed. However, it is recommended to work on the host machine in case a local VM is needed during development, as it provides better performance and access to system resources.
 
 ### 🚀 Provisioning infrastructure
 
@@ -91,7 +91,7 @@ Wait for AMI build to complete before proceeding with application deployment. Th
 
 ![Trigger deployment workflow in GitHub Actions](./docs/trigger-deployment-gha.png)
 
-Once deployed, you can access the application running on the Windows EC2 instances on the browser using the public DNS (e.g. `http://aws-codedeploy-windows-dev-buqpf-710038041.ap-northeast-2.elb.amazonaws.com/docs`) or IP address of the ALB (Application Load Balancer).
+Once deployed, you can access the application in a browser using the ALB (Application Load Balancer) public DNS name (e.g. `http://aws-codedeploy-windows-dev-buqpf-710038041.ap-northeast-2.elb.amazonaws.com/docs`).
 
 ![API documentation page](./docs/api-docs-page.png)
 
@@ -104,4 +104,4 @@ $ pulumi destroy
 $ pulumi stack rm dev
 ```
 
-However, resources such as Image Builder images, AMIs, and EBS Snapshots are created externally. We use [Dynamics Provider](https://www.pulumi.com/docs/iac/concepts/providers/dynamic-providers/) to delete them automatically. However, there might be cases where manual cleanup is still required. So it is recommended to check if any of these resources still exist and delete them manually if necessary.
+However, resources such as Image Builder images, AMIs, and EBS Snapshots are created externally. We use a [Dynamic Provider](https://www.pulumi.com/docs/iac/concepts/providers/dynamic-providers/) to delete them automatically. However, there might be cases where manual cleanup is still required. So it is recommended to check if any of these resources still exist and delete them manually if necessary.
