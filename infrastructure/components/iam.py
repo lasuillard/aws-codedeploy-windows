@@ -157,29 +157,32 @@ class Role(Component):
 
     def build(self) -> aws.iam.Role:
         """Create and return the IAM role."""
-        role = aws.iam.Role(
-            self._name,
-            opts=ResourceOptions(parent=self),
-            assume_role_policy=self._assume_role_policy.json,
-            **self._kwargs,
-        )
-
-        # Create document policies
-        document_policy_arns: list[Input[str]] = []
+        document_policies: list[aws.iam.Policy] = []
         for idx, policy_document in enumerate(self._policy_documents):
             policy = aws.iam.Policy(
                 f"{self._name}-inline-{idx}",
                 opts=ResourceOptions(parent=self),
                 policy=policy_document.json,
             )
-            document_policy_arns.append(policy.arn)
+            document_policies.append(policy)
+
+        document_policy_arns = [policy.arn for policy in document_policies]
+
+        # Create the IAM role
+        role = aws.iam.Role(
+            self._name,
+            opts=ResourceOptions(parent=self, depends_on=document_policies),
+            assume_role_policy=self._assume_role_policy.json,
+            force_detach_policies=True,
+            **self._kwargs,
+        )
 
         # Attach policies
         self._policy_arns = [*self._policy_arns, *document_policy_arns]
         if self._policy_attachment_exclusive:
             aws.iam.RolePolicyAttachmentsExclusive(
                 f"{self._name}-attachments",
-                opts=ResourceOptions(parent=self),
+                opts=ResourceOptions(parent=self, depends_on=[role]),
                 role_name=role.name,
                 policy_arns=self._policy_arns,
             )
@@ -187,7 +190,7 @@ class Role(Component):
             for idx, arn in enumerate(self._policy_arns):
                 aws.iam.RolePolicyAttachment(
                     f"{self._name}-attachment-{idx}",
-                    opts=ResourceOptions(parent=self),
+                    opts=ResourceOptions(parent=self, depends_on=[role]),
                     role=role.name,
                     policy_arn=arn,
                 )
