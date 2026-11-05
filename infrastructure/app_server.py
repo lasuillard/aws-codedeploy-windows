@@ -112,12 +112,10 @@ launch_template = aws.ec2.LaunchTemplate(
     # SSH key pair is required when accessing via Fleet Manager Remote Desktop to retrieve admin credentials.
     key_name=key_pair.key_name,
     iam_instance_profile={"arn": instance_profile.arn},
-    user_data=render_template(  # ty: ignore[missing-argument]
+    user_data=render_template(
         Path(__file__).parent / "Bootstrap.userdata.jinja",
         inputs={},
-    ).apply(
-        lambda text: base64.b64encode(text.encode()).decode("utf-8")  # ty: ignore[invalid-argument-type]
-    ),
+    ).apply(lambda text: base64.b64encode(text.encode()).decode("utf-8")),
     vpc_security_group_ids=[security_group.id],
     monitoring={"enabled": True},
 )

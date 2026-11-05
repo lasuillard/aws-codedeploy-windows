@@ -6,36 +6,36 @@ authors = [{ name = "Yuchan Lee", email = "lasuillard@gmail.com" }]
 readme = "README.md"
 requires-python = ">=3.14, <4.0"
 dependencies = [
-    "fastapi[standard]==0.115.14",
-    "numpy==2.5.2",
-    "opencv-python==5.0.0.93",
-    "pydantic-settings==2.15.0",
-    "python-statemachine[diagrams]==3.2.1",
-    "selenium==4.47.0",
-    "structlog==26.1.0",
+    "fastapi[standard]~=0.115.14",
+    "numpy~=2.5.2",
+    "opencv-python~=5.0.0.93",
+    "pydantic-settings~=2.15.0",
+    "python-statemachine[diagrams]~=3.2.1",
+    "selenium~=4.47.0",
+    "structlog~=26.1.0",
 ]
 
 [dependency-groups]
 dev = [
-  "coverage==7.9.1",
-  "factory-boy==3.3.3",
-  "faker==37.4.0",
-  "pytest==8.4.1",
-  "pytest-cov==6.2.1",
-  "pytest-sugar==1.0.0",
-  "ruff==0.12.0",
-  "ty==0.0.84",
+  "coverage~=7.9.1",
+  "factory-boy~=3.3.3",
+  "faker~=37.4.0",
+  "pytest~=8.4.1",
+  "pytest-cov~=6.2.1",
+  "pytest-sugar~=1.0.0",
+  "ruff~=0.12.0",
+  "ty~=0.0.84",
 ]
 infra = [
-  "boto3==1.38.6",
-  "pulumi-aws==7.43.0",
-  "pulumi-awsx==3.8.0",
-  "pulumi-command==1.0.2",
-  "pulumi-extra==0.1.0",
-  "pulumi-github==6.7.2",
-  "pulumi-policy==1.20.0",
-  "pulumi-random==4.19.1",
-  "pulumi-tls==5.1.1",
+  "boto3~=1.38.6",
+  "pulumi-aws~=7.43.0",
+  "pulumi-awsx~=3.8.0",
+  "pulumi-command~=1.0.2",
+  "pulumi-extra~=0.1.0",
+  "pulumi-github~=6.7.2",
+  "pulumi-policy~=1.20.0",
+  "pulumi-random~=4.19.1",
+  "pulumi-tls~=5.1.1",
   "pulumi>=3.0.0,<4.0.0",
 ]
 
